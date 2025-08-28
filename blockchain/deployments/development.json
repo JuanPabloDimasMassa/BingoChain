@@ -1,5 +1,6 @@
 {
   "network": "development",
-  "contractAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
+  "contractAddress": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
   "deployer": "0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
-  "deploymentTime": "2025-08-28T18:33:14.461Z"
+  "deploymentTime": "2025-08-28T19:33:17.851Z"
+}

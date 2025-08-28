@@ -512,13 +512,48 @@ contract CryptoBingo is ERC721, ERC721URIStorage, ReentrancyGuard, Ownable, Paus
         view 
         returns (string memory) 
     {
-        // Create JSON metadata for the NFT
+        // Simplified metadata generation to avoid stack too deep
+        string memory json = string(abi.encodePacked(
+            '{"name": "BingoChain Ticket #',
+            Strings.toString(_ticketId),
+            '", "description": "Lottery Ticket NFT #',
+            Strings.toString(_lotteryId),
+            '", "image": "data:image/svg+xml;utf8,',
+            _generateSimpleSVG(_ticketId, _lotteryId),
+            '", "attributes": [{"trait_type": "Lottery", "value": "',
+            Strings.toString(_lotteryId),
+            '"}, {"trait_type": "Ticket", "value": "',
+            Strings.toString(_ticketId),
+            '"}]}'
+        ));
+        
+        return string(abi.encodePacked("data:application/json;utf8,", json));
+    }
+    
+    /**
+     * @dev Generate simple SVG image for NFT ticket
+     */
+    function _generateSimpleSVG(uint256 _ticketId, uint256 _lotteryId) 
+        internal 
+        pure 
+        returns (string memory) 
+    {
         return string(abi.encodePacked(
-            _baseTokenURI,
-            "lottery/", Strings.toString(_lotteryId),
-            "/ticket/", Strings.toString(_ticketId)
+            '<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">',
+            '<rect width="300" height="200" fill="%23667eea" rx="10"/>',
+            '<text x="150" y="50" text-anchor="middle" fill="white" font-size="18">BingoChain</text>',
+            '<text x="150" y="80" text-anchor="middle" fill="white" font-size="14">Lottery Ticket</text>',
+            '<text x="150" y="120" text-anchor="middle" fill="white" font-size="12">Ticket #',
+            Strings.toString(_ticketId),
+            '</text>',
+            '<text x="150" y="150" text-anchor="middle" fill="white" font-size="10">Lottery #',
+            Strings.toString(_lotteryId),
+            '</text>',
+            '</svg>'
         ));
     }
+    
+
     
     /**
      * @dev Get ticket info by token ID
