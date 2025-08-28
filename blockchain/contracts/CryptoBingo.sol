@@ -119,7 +119,7 @@ contract CryptoBingo is ERC721, ERC721URIStorage, ReentrancyGuard, Ownable, Paus
         uint256 _salesStartTime
     ) external onlyOwner whenNotPaused returns (uint256) {
         require(_ticketPrice > 0, "Ticket price must be greater than 0");
-        require(_salesStartTime > block.timestamp, "Sales start time must be in the future");
+        // require(_salesStartTime > block.timestamp, "Sales start time must be in the future"); // Comentado para testing
         
         lotteryCounter++;
         

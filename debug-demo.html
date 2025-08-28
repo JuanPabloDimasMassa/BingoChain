@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 Debug - Comprar Boleto NFT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .debug-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .success { background: rgba(46, 204, 113, 0.3); }
+        .error { background: rgba(231, 76, 60, 0.3); }
+        .warning { background: rgba(241, 196, 15, 0.3); }
+        .code { background: rgba(0, 0, 0, 0.5); padding: 10px; border-radius: 5px; font-family: monospace; }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { transform: translateY(-2px); }
+        .number-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 2px;
+            display: inline-block;
+            min-width: 30px;
+            text-align: center;
+        }
+        .number-btn.selected {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            border-color: #fff;
+        }
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            max-width: 500px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Debug - Comprar Boleto NFT</h1>
+        
+        <div class="debug-section">
+            <h3>1. Conexión MetaMask</h3>
+            <button onclick="connectWallet()">Conectar MetaMask</button>
+            <div id="wallet-status" class="code">Desconectado</div>
+        </div>
+
+        <div class="debug-section">
+            <h3>2. Información del Contrato</h3>
+            <button onclick="checkContract()">Verificar Contrato</button>
+            <div id="contract-status" class="code">No verificado</div>
+        </div>
+
+        <div class="debug-section">
+            <h3>3. Estado de la Lotería</h3>
+            <button onclick="checkLottery()">Verificar Lotería #1</button>
+            <div id="lottery-status" class="code">No verificado</div>
+        </div>
+
+        <div class="debug-section">
+            <h3>4. Selección de Números</h3>
+            <p>Selecciona 6 números del 1 al 20 (para testing):</p>
+            <div class="numbers-grid" id="numbers-grid"></div>
+            <div>Seleccionados: <span id="selected-count">0</span>/6</div>
+            <div id="selected-list" class="code"></div>
+            <button onclick="selectRandom()">6 Números Aleatorios</button>
+            <button onclick="clearSelection()">Limpiar</button>
+        </div>
+
+        <div class="debug-section">
+            <h3>5. Compra de Boleto (DEBUG)</h3>
+            <button onclick="debugBuyTicket()">🐛 Comprar con Debug Completo</button>
+            <div id="debug-log" class="code" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script>
+        const CONTRACT_ADDRESS = '0xe982E462b094850F12AF94d21D470e21bE9D0E9C';
+        const GANACHE_CHAIN_ID = '0x539';
+        
+        // ABI mínimo para testing
+        const CONTRACT_ABI = [
+            {
+                "inputs": [
+                    {"internalType": "uint256", "name": "_lotteryId", "type": "uint256"},
+                    {"internalType": "uint8[6]", "name": "_chosenNumbers", "type": "uint8[6]"}
+                ],
+                "name": "buyTicket",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "name": "lotteries",
+                "outputs": [
+                    {"internalType": "bool", "name": "isActive", "type": "bool"},
+                    {"internalType": "uint256", "name": "ticketPrice", "type": "uint256"},
+                    {"internalType": "uint256", "name": "startTime", "type": "uint256"},
+                    {"internalType": "uint256", "name": "endTime", "type": "uint256"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        let web3, contract, userAccount;
+        let selectedNumbers = [];
+
+        // Inicializar números 1-20 para testing
+        window.addEventListener('load', () => {
+            initializeNumbers();
+        });
+
+        function initializeNumbers() {
+            const grid = document.getElementById('numbers-grid');
+            for (let i = 1; i <= 20; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'number-btn';
+                btn.textContent = i;
+                btn.onclick = () => toggleNumber(i, btn);
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleNumber(num, btn) {
+            const index = selectedNumbers.indexOf(num);
+            if (index > -1) {
+                selectedNumbers.splice(index, 1);
+                btn.classList.remove('selected');
+            } else {
+                if (selectedNumbers.length >= 6) {
+                    log('Ya tienes 6 números seleccionados');
+                    return;
+                }
+                selectedNumbers.push(num);
+                btn.classList.add('selected');
+            }
+            updateDisplay();
+        }
+
+        function selectRandom() {
+            clearSelection();
+            while (selectedNumbers.length < 6) {
+                const num = Math.floor(Math.random() * 20) + 1;
+                if (!selectedNumbers.includes(num)) {
+                    selectedNumbers.push(num);
+                    document.querySelector(`[onclick*="${num}"]`).classList.add('selected');
+                }
+            }
+            updateDisplay();
+        }
+
+        function clearSelection() {
+            selectedNumbers = [];
+            document.querySelectorAll('.number-btn.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('selected-count').textContent = selectedNumbers.length;
+            document.getElementById('selected-list').textContent = selectedNumbers.sort((a,b) => a-b).join(', ');
+        }
+
+        async function connectWallet() {
+            try {
+                log('🔗 Conectando MetaMask...');
+                
+                if (typeof window.ethereum === 'undefined') {
+                    throw new Error('MetaMask no instalado');
+                }
+
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAccount = accounts[0];
+                
+                web3 = new Web3(window.ethereum);
+                contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const balance = await web3.eth.getBalance(userAccount);
+
+                document.getElementById('wallet-status').innerHTML = `
+                    Cuenta: ${userAccount}<br>
+                    Chain ID: ${chainId} ${chainId === GANACHE_CHAIN_ID ? '✅' : '❌'}<br>
+                    Balance: ${web3.utils.fromWei(balance.toString(), 'ether')} ETH
+                `;
+                document.getElementById('wallet-status').className = 'code success';
+                
+                log('✅ MetaMask conectado exitosamente');
+
+            } catch (error) {
+                log('❌ Error conectando: ' + error.message);
+                document.getElementById('wallet-status').className = 'code error';
+            }
+        }
+
+        async function checkContract() {
+            try {
+                log('🔍 Verificando contrato...');
+                
+                if (!web3) throw new Error('Conecta MetaMask primero');
+
+                const code = await web3.eth.getCode(CONTRACT_ADDRESS);
+                const isDeployed = code !== '0x';
+
+                document.getElementById('contract-status').innerHTML = `
+                    Dirección: ${CONTRACT_ADDRESS}<br>
+                    Desplegado: ${isDeployed ? '✅ Sí' : '❌ No'}<br>
+                    Código: ${code.substring(0, 50)}...
+                `;
+                document.getElementById('contract-status').className = isDeployed ? 'code success' : 'code error';
+                
+                log(isDeployed ? '✅ Contrato verificado' : '❌ Contrato no encontrado');
+
+            } catch (error) {
+                log('❌ Error verificando contrato: ' + error.message);
+                document.getElementById('contract-status').className = 'code error';
+            }
+        }
+
+        async function checkLottery() {
+            try {
+                log('🎲 Verificando estado de lotería...');
+                
+                if (!contract) throw new Error('Contrato no inicializado');
+
+                // Intentar obtener información de la lotería
+                const lottery = await contract.methods.lotteries(1).call();
+                
+                document.getElementById('lottery-status').innerHTML = `
+                    Lotería #1:<br>
+                    Activa: ${lottery.isActive ? '✅ Sí' : '❌ No'}<br>
+                    Precio: ${lottery.ticketPrice} wei<br>
+                    Inicio: ${new Date(lottery.startTime * 1000).toLocaleString()}<br>
+                    Fin: ${new Date(lottery.endTime * 1000).toLocaleString()}
+                `;
+                document.getElementById('lottery-status').className = 'code success';
+                
+                log('✅ Lotería verificada');
+
+            } catch (error) {
+                log('❌ Error verificando lotería: ' + error.message);
+                document.getElementById('lottery-status').innerHTML = `Error: ${error.message}`;
+                document.getElementById('lottery-status').className = 'code error';
+            }
+        }
+
+        async function debugBuyTicket() {
+            try {
+                log('🐛 === INICIANDO COMPRA DEBUG ===');
+                
+                if (!userAccount || !contract) {
+                    throw new Error('Conecta MetaMask y verifica el contrato primero');
+                }
+
+                if (selectedNumbers.length !== 6) {
+                    throw new Error('Selecciona exactamente 6 números');
+                }
+
+                log('1. Preparando números...');
+                const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b);
+                while (sortedNumbers.length < 6) sortedNumbers.push(0);
+                const uint8Numbers = sortedNumbers.map(n => Math.min(255, Math.max(0, n)));
+                log(`   Números originales: [${selectedNumbers.join(', ')}]`);
+                log(`   Números ordenados: [${sortedNumbers.join(', ')}]`);
+                log(`   Números uint8: [${uint8Numbers.join(', ')}]`);
+
+                log('2. Verificando red...');
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== GANACHE_CHAIN_ID) {
+                    throw new Error(`Red incorrecta. Chain ID: ${chainId}, esperado: ${GANACHE_CHAIN_ID}`);
+                }
+                log(`   ✅ Red correcta: ${chainId}`);
+
+                log('3. Verificando balance...');
+                const balance = await web3.eth.getBalance(userAccount);
+                log(`   Balance: ${web3.utils.fromWei(balance.toString(), 'ether')} ETH`);
+
+                log('4. Preparando transacción...');
+                const ticketPrice = web3.utils.toWei('0.01', 'ether');
+                const txData = {
+                    from: userAccount,
+                    to: CONTRACT_ADDRESS,
+                    value: ticketPrice,
+                    gas: '500000',
+                    gasPrice: '20000000000'
+                };
+                log(`   Parámetros: ${JSON.stringify(txData, null, 2)}`);
+
+                log('5. Estimando gas...');
+                try {
+                    const gasEstimate = await contract.methods.buyTicket(1, uint8Numbers).estimateGas(txData);
+                    log(`   Gas estimado: ${gasEstimate}`);
+                } catch (gasError) {
+                    log(`   ⚠️ Error estimando gas: ${gasError.message}`);
+                    log('   Continuando con gas fijo...');
+                }
+
+                log('6. Enviando transacción...');
+                const transaction = await contract.methods.buyTicket(1, uint8Numbers).send(txData);
+                
+                log('7. ✅ TRANSACCIÓN EXITOSA!');
+                log(`   Hash: ${transaction.transactionHash}`);
+                log(`   Block: ${transaction.blockNumber}`);
+                log(`   Gas usado: ${transaction.gasUsed}`);
+
+                clearSelection();
+
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`);
+                if (error.data) {
+                    log(`   Datos del error: ${JSON.stringify(error.data)}`);
+                }
+                if (error.stack) {
+                    log(`   Stack: ${error.stack}`);
+                }
+            }
+        }
+
+        function log(message) {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+    </script>
+</body>
+</html>

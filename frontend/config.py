@@ -19,5 +19,5 @@ class Config:
     # Contract Addresses
     CRYPTO_BINGO_CONTRACT_ADDRESS = os.environ.get('CRYPTO_BINGO_CONTRACT_ADDRESS') or ''
     
-    # WebSocket Configuration
-    SOCKET_IO_ASYNC_MODE = os.environ.get('SOCKET_IO_ASYNC_MODE') or 'eventlet'
+    # Flask Configuration
+    FLASK_PORT = int(os.environ.get('FLASK_PORT') or 3000)

@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit, join_room, leave_room
 import requests
 import json
+import os
 from web3 import Web3
 from config import Config
 import logging
@@ -16,7 +16,6 @@ app.config.from_object(Config)
 
 # Initialize extensions
 CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"])
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode=Config.SOCKET_IO_ASYNC_MODE)
 
 # Initialize Web3
 try:
@@ -216,4 +215,4 @@ def internal_error(error):
 
 if __name__ == '__main__':
     port = int(os.environ.get('FLASK_PORT', 3000))
-    socketio.run(app, host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=True)

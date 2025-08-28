@@ -10,23 +10,29 @@ module.exports = async function (deployer, network, accounts) {
   
   console.log(`CryptoBingo deployed at: ${cryptoBingo.address}`);
   
-  // Optional: Create a test game for development
+  // Create a test lottery for development
   if (network === 'development' || network === 'ganache') {
-    console.log('Creating test game...');
+    console.log('Creating test lottery...');
     
-    const entryFee = web3.utils.toWei('0.01', 'ether'); // 0.01 ETH
-    const maxPlayers = 10;
+    const ticketPrice = web3.utils.toWei('0.01', 'ether'); // 0.01 ETH
+    const currentTime = Math.floor(Date.now() / 1000);
+    const salesStartTime = currentTime - 3600; // Started 1 hour ago
     
-    const salesStartTime = Math.floor(Date.now() / 1000) + 60; // Start in 1 minute
-    
-    const tx = await cryptoBingo.createWeeklyLottery(
-      "Test Weekly Lottery",
-      entryFee,
-      salesStartTime,
-      { from: accounts[0] }
-    );
-    
-    console.log(`Test lottery created with ID: ${tx.logs[0].args.lotteryId}`);
+    try {
+      const tx = await cryptoBingo.createWeeklyLottery(
+        "Sorteo Semanal #1 - BingoChain",
+        ticketPrice,
+        salesStartTime,
+        { from: accounts[0], gas: 2000000 }
+      );
+      
+      console.log(`Test lottery created with ID: 1`);
+      console.log(`Ticket price: 0.01 ETH`);
+      console.log(`Sales started at: ${new Date(salesStartTime * 1000).toLocaleString()}`);
+      
+    } catch (error) {
+      console.log('Error creating lottery:', error.message);
+    }
   }
   
   // Save deployment info to a file

@@ -57,10 +57,9 @@
         .ticket-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .ticket-id { font-size: 1.2em; font-weight: bold; color: #ffd700; }
-                 .ticket-status { padding: 5px 12px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
-         .status-ganador { background: #4CAF50; color: white; }
-         .status-en-juego { background: #FF9800; color: white; }
-         .status-perdido { background: #f44336; color: white; }
+        .ticket-status { padding: 5px 12px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
+        .status-winner { background: #4CAF50; color: white; }
+        .status-playing { background: #2196F3; color: white; }
         .numbers-display { display: flex; gap: 10px; margin: 15px 0; justify-content: center; }
         .number-ball { 
             width: 40px; height: 40px; 
@@ -116,32 +115,24 @@
             <button class="btn" onclick="loadTickets()">🔄 Recargar Boletos</button>
         </div>
 
-                 <!-- Estadísticas -->
-         <div class="card">
-             <h3>📊 Estadísticas</h3>
-             <div class="stats-grid">
-                 <div class="stat-card">
-                     <div class="stat-number" id="total-tickets">0</div>
-                     <div class="stat-label">Boletos Totales</div>
-                 </div>
-                 <div class="stat-card">
-                     <div class="stat-number" id="ganador-tickets" style="color: #4CAF50;">0</div>
-                     <div class="stat-label">🏆 Ganadores</div>
-                 </div>
-                 <div class="stat-card">
-                     <div class="stat-number" id="en-juego-tickets" style="color: #FF9800;">0</div>
-                     <div class="stat-label">🎮 En Juego</div>
-                 </div>
-                 <div class="stat-card">
-                     <div class="stat-number" id="perdido-tickets" style="color: #f44336;">0</div>
-                     <div class="stat-label">❌ Perdidos</div>
-                 </div>
-                 <div class="stat-card">
-                     <div class="stat-number" id="total-matches">0</div>
-                     <div class="stat-label">Aciertos Totales</div>
-                 </div>
-             </div>
-         </div>
+        <!-- Estadísticas -->
+        <div class="card">
+            <h3>📊 Estadísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-tickets">0</div>
+                    <div class="stat-label">Boletos Totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="winning-tickets">0</div>
+                    <div class="stat-label">Boletos Ganadores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-matches">0</div>
+                    <div class="stat-label">Aciertos Totales</div>
+                </div>
+            </div>
+        </div>
 
         <!-- Boletos -->
         <div class="card">
@@ -249,12 +240,12 @@
                 const ticketIds = await contract.methods.getAllPlayerTickets(userAccount).call();
                 console.log('IDs de tickets encontrados:', ticketIds);
                 
-                                 if (!ticketIds || ticketIds.length === 0) {
-                     displayNoTickets();
-                     updateStats(0, 0, 0, 0, 0);
-                     showMessage('No tienes boletos NFT aún. ¡Compra tu primer boleto!', 'warning');
-                     return;
-                 }
+                if (!ticketIds || ticketIds.length === 0) {
+                    displayNoTickets();
+                    updateStats(0, 0, 0);
+                    showMessage('No tienes boletos NFT aún. ¡Compra tu primer boleto!', 'warning');
+                    return;
+                }
 
                 // Obtener detalles de cada ticket usando getTicket
                 userTickets = [];
@@ -280,17 +271,12 @@
 
                 console.log('Tickets procesados:', userTickets);
 
-                                 if (userTickets.length > 0) {
-                     displayTickets();
-                     
-                     // Calcular estadísticas por estado
-                     const ganadores = userTickets.filter(t => t.matches === 6).length;
-                     const perdidos = userTickets.filter(t => t.isWinner === false && t.matches < 6).length;
-                     const enJuego = userTickets.length - ganadores - perdidos;
-                     const totalMatches = userTickets.reduce((sum, t) => sum + parseInt(t.matches), 0);
-                     
-                     updateStats(userTickets.length, ganadores, enJuego, perdidos, totalMatches);
-                     showMessage(`✅ ${userTickets.length} boletos cargados exitosamente`, 'success');
+                if (userTickets.length > 0) {
+                    displayTickets();
+                    const winners = userTickets.filter(t => t.isWinner).length;
+                    const totalMatches = userTickets.reduce((sum, t) => sum + parseInt(t.matches), 0);
+                    updateStats(userTickets.length, winners, totalMatches);
+                    showMessage(`✅ ${userTickets.length} boletos cargados exitosamente`, 'success');
                 } else {
                     displayNoTickets();
                     showMessage('No se encontraron boletos válidos', 'warning');
@@ -311,25 +297,10 @@
                 return;
             }
 
-                         let html = '';
-             userTickets.forEach((ticket, index) => {
-                 // Determinar el estado del boleto basado en la lógica del juego
-                 let statusClass, statusText;
-                 
-                 if (ticket.matches === 6) {
-                     // Si acertó los 6 números = GANADOR
-                     statusClass = 'status-ganador';
-                     statusText = '🏆 GANADOR';
-                 } else if (ticket.isWinner === false) {
-                     // Si el contrato marcó isWinner = false, significa que ya perdió
-                     // (se sorteó un número que no tenía)
-                     statusClass = 'status-perdido';
-                     statusText = '❌ PERDIDO';
-                 } else {
-                     // Estado inicial o aún en juego
-                     statusClass = 'status-en-juego';
-                     statusText = '🎮 EN JUEGO';
-                 }
+            let html = '';
+            userTickets.forEach((ticket, index) => {
+                const statusClass = ticket.isWinner ? 'status-winner' : 'status-playing';
+                const statusText = ticket.isWinner ? '🏆 GANADOR' : '🎮 Jugando';
                 
                 html += `
                     <div class="ticket-card">
@@ -380,13 +351,11 @@
             `;
         }
 
-                 function updateStats(total, ganadores, enJuego, perdidos, matches) {
-             document.getElementById('total-tickets').textContent = total;
-             document.getElementById('ganador-tickets').textContent = ganadores;
-             document.getElementById('en-juego-tickets').textContent = enJuego;
-             document.getElementById('perdido-tickets').textContent = perdidos;
-             document.getElementById('total-matches').textContent = matches;
-         }
+        function updateStats(total, winners, matches) {
+            document.getElementById('total-tickets').textContent = total;
+            document.getElementById('winning-tickets').textContent = winners;
+            document.getElementById('total-matches').textContent = matches;
+        }
 
         function showMessage(message, type) {
             const container = document.getElementById('status-messages');
