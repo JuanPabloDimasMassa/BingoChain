@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Comprar Boleto - BingoChain{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Sorteos</a></li>
+                    <li class="breadcrumb-item active">Comprar Boleto</li>
+                </ol>
+            </nav>
+            <h1 class="display-6 fw-bold text-primary">
+                <i class="fas fa-ticket-alt me-2"></i>
+                Comprar Boleto NFT
+            </h1>
+        </div>
+    </div>
+
+    <!-- Lottery Info -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div id="lotteryInfo" class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando información del sorteo...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Form -->
+    <div id="purchaseSection" style="display: none;">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Number Selection -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list-ol"></i> 
+                            Selecciona 6 Números (del 1 al 100)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Debes seleccionar exactamente 6 números diferentes del 1 al 100.
+                        </div>
+                        
+                        <!-- Number Grid -->
+                        <div id="numberGrid" class="number-grid mb-3">
+                            <!-- Numbers will be generated here -->
+                        </div>
+                        
+                        <!-- Selected Numbers Display -->
+                        <div class="selected-numbers-section">
+                            <h6>Números Seleccionados:</h6>
+                            <div id="selectedNumbers" class="selected-numbers">
+                                <span class="text-muted">Ninguno seleccionado</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Pick Button -->
+                        <div class="mt-3">
+                            <button id="quickPickBtn" class="btn btn-outline-primary">
+                                <i class="fas fa-random"></i> Selección Rápida
+                            </button>
+                            <button id="clearSelectionBtn" class="btn btn-outline-secondary">
+                                <i class="fas fa-eraser"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Purchase Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-receipt"></i> 
+                            Resumen de Compra
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Precio del Boleto:</span>
+                                <span id="ticketPrice" class="fw-bold">-- ETH</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Números Seleccionados:</span>
+                                <span id="selectedCount" class="fw-bold">0/6</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>Tu Wallet:</span>
+                                <span id="walletDisplay" class="fw-bold small">No conectado</span>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="h6">Total a Pagar:</span>
+                                <span id="totalPrice" class="h6 text-success fw-bold">-- ETH</span>
+                            </div>
+                        </div>
+                        
+                        <button id="purchaseBtn" class="btn btn-success w-100" disabled>
+                            <i class="fas fa-shopping-cart"></i> 
+                            Comprar Boleto NFT
+                        </button>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt"></i>
+                                Tu boleto será generado como un NFT único y estará disponible en tu wallet MetaMask.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- NFT Info -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6><i class="fas fa-gem text-warning"></i> Boleto NFT</h6>
+                        <p class="small text-muted mb-0">
+                            Tu boleto será creado como un NFT (Token No Fungible) que podrás ver en tu wallet MetaMask y en mercados de NFTs compatibles.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Purchase -->
+    <div id="loadingPurchase" class="text-center py-5" style="display: none;">
+        <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Procesando compra...</span>
+        </div>
+        <p class="mt-3">Procesando tu compra en blockchain...</p>
+        <p class="text-muted">Por favor, confirma la transacción en MetaMask</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/purchase.js') }}"></script>
+<script>
+const LOTTERY_ID = {{ lottery_id }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializePurchasePage();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+server:
+  port: 3500
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: bingochain-backend
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5434/bingo_crypto
+    username: Postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+    defer-datasource-initialization: true
+  
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
+
+# Blockchain Configuration
+blockchain:
+  ethereum:
+    network-url: http://localhost:8545  # Ganache or local node
+    chain-id: 1337  # Local development chain ID
+    gas-price: 20000000000  # 20 Gwei
+    gas-limit: 6721975
+  
+  contract:
+    crypto-bingo:
+      address: ""  # Will be set after deployment
+    
+# CORS Configuration
+cors:
+  allowed-origins:
+    - http://localhost:3000  # Frontend URL
+    - http://127.0.0.1:3000
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+
+# Logging Configuration
+logging:
+  level:
+    com.bingochain: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/bingochain-backend.log
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

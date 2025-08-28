@@ -1,0 +1,523 @@
+/* BingoChain Custom Styles */
+
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.feature-icon {
+    margin-bottom: 1rem;
+}
+
+/* Bingo Card Preview */
+.bingo-card-preview {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.bingo-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.bingo-header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.letter {
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-radius: 5px;
+}
+
+.bingo-numbers {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.number {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.number:hover {
+    background: #e9ecef;
+}
+
+.number.marked {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.number.free {
+    background: var(--warning-color);
+    color: var(--dark-color);
+    border-color: var(--warning-color);
+    font-size: 0.8rem;
+}
+
+/* Game Lobby Styles */
+.game-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+}
+
+.game-status {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.game-status.waiting {
+    color: var(--warning-color);
+}
+
+.game-status.active {
+    color: var(--success-color);
+}
+
+.game-status.completed {
+    color: var(--secondary-color);
+}
+
+/* Real-time Bingo Game Styles */
+.bingo-game-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.game-info-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.bingo-card-container {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.called-numbers {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.called-number {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 5px 10px;
+    margin: 2px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.current-call {
+    background: var(--success-color);
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Wallet Connection Styles */
+.wallet-connected {
+    background: var(--success-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.wallet-address {
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+/* Loading Spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .bingo-grid {
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .number {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .letter {
+        padding: 8px;
+        font-size: 1rem;
+    }
+    
+    .hero-section {
+        text-align: center;
+        padding: 2rem 0;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Animation for new number calls */
+.number-call-animation {
+    animation: newCall 0.5s ease-in-out;
+}
+
+@keyframes newCall {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Winner celebration */
+.winner-celebration {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: var(--dark-color);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    animation: celebrate 1s ease-in-out;
+}
+
+@keyframes celebrate {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Number Selection Grid */
+.number-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+    max-width: 600px;
+}
+
+.number-btn {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.number-btn:hover {
+    background: #e9ecef;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.number-btn.selected {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.selected-numbers {
+    min-height: 40px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.selected-numbers-section {
+    margin-top: 20px;
+}
+
+/* Lottery Cards */
+.lottery-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.lottery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.lottery-status-badge {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+}
+
+.drawn-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.drawn-numbers .badge {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+}
+
+/* Sales Timer */
+.sales-timer {
+    text-align: center;
+    padding: 10px;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 8px;
+}
+
+/* Purchase Summary */
+.purchase-summary {
+    position: sticky;
+    top: 20px;
+}
+
+/* Loading States */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+/* NFT Badge */
+.nft-badge {
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Responsive adjustments for purchase page */
+@media (max-width: 768px) {
+    .number-grid {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 6px;
+    }
+    
+    .number-btn {
+        padding: 10px 6px;
+        min-height: 40px;
+        font-size: 0.9rem;
+    }
+    
+    .purchase-summary {
+        position: static;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .number-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 4px;
+    }
+    
+    .number-btn {
+        padding: 8px 4px;
+        min-height: 36px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Lottery Status Colors */
+.status-open {
+    background-color: #28a745;
+}
+
+.status-drawing {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-closed {
+    background-color: #6c757d;
+}
+
+.status-cancelled {
+    background-color: #dc3545;
+}
+
+/* My Tickets Page */
+.ticket-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.ticket-card:hover {
+    transform: translateY(-3px);
+}
+
+.ticket-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.ticket-number {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.ticket-number.matched {
+    background: #28a745;
+    color: white;
+}
+
+.winning-ticket {
+    border: 3px solid #ffd700;
+    background: linear-gradient(135deg, #fff9c4, #fff);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .feature-card,
+    .game-card,
+    .bingo-card-container {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .number {
+        background: #4a5568;
+        border-color: #2d3748;
+        color: white;
+    }
+    
+    .number-btn {
+        background: #4a5568;
+        border-color: #2d3748;
+        color: white;
+    }
+    
+    .selected-numbers {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+}

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BingoChain - Configurar Red Sepolia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .card { box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: none; }
+        .step-card { margin-bottom: 20px; }
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .highlight { background: #fff3cd; padding: 2px 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="demo.html"><i class="fas fa-dice me-2"></i>BingoChain</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="demo.html"><i class="fas fa-home"></i> Demo</a>
+                <a class="nav-link" href="mis-boletos.html"><i class="fas fa-ticket-alt"></i> Mis Boletos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-center mb-4">
+                            <i class="fas fa-network-wired text-primary"></i>
+                            Configurar Red Sepolia para Pruebas
+                        </h4>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>¿Por qué Sepolia?</strong> Sepolia es una red de prueba de Ethereum que simula el comportamiento real de la mainnet pero con ETH gratuito. ¡Perfecto para probar tu billetera real sin costos!
+                        </div>
+
+                        <!-- Paso 1: Agregar Red Sepolia -->
+                        <div class="card step-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">1</div>
+                                    <div class="flex-grow-1">
+                                        <h5>Agregar Red Sepolia a MetaMask</h5>
+                                        <p>Agrega la red de test Sepolia a tu MetaMask:</p>
+                                        
+                                        <div class="code-block">
+                                            <strong>Nombre de Red:</strong> Sepolia Test Network<br>
+                                            <strong>RPC URL:</strong> https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161<br>
+                                            <strong>Chain ID:</strong> 11155111<br>
+                                            <strong>Símbolo:</strong> ETH<br>
+                                            <strong>Block Explorer:</strong> https://sepolia.etherscan.io
+                                        </div>
+                                        
+                                        <button class="btn btn-primary" onclick="addSepoliaNetwork()">
+                                            <i class="fas fa-plus"></i> Agregar Sepolia Automáticamente
+                                        </button>
+                                        
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-lightbulb"></i>
+                                                <strong>Tip:</strong> También puedes ir a MetaMask → Configuración → Redes → Agregar Red y llenar los datos manualmente.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 2: Obtener ETH de Test -->
+                        <div class="card step-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">2</div>
+                                    <div class="flex-grow-1">
+                                        <h5>Obtener ETH Gratis de Sepolia</h5>
+                                        <p>Usa estos faucets para obtener ETH de prueba gratuito:</p>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6><i class="fas fa-faucet"></i> Faucet Sepolia Oficial</h6>
+                                                        <p class="small">Requiere cuenta de GitHub/Twitter</p>
+                                                        <a href="https://sepoliafaucet.com/" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-external-link-alt"></i> Abrir Faucet
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h6><i class="fas fa-faucet"></i> Faucet Chainlink</h6>
+                                                        <p class="small">Alternativo y confiable</p>
+                                                        <a href="https://faucets.chain.link/sepolia" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                            <i class="fas fa-external-link-alt"></i> Abrir Faucet
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="alert alert-warning mt-3">
+                                            <i class="fas fa-wallet"></i>
+                                            <strong>Tu Dirección:</strong> <code id="userAddress">Conecta MetaMask para verla</code>
+                                            <button class="btn btn-sm btn-outline-dark ms-2" onclick="copyAddress()">
+                                                <i class="fas fa-copy"></i> Copiar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 3: Verificar Balance -->
+                        <div class="card step-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">3</div>
+                                    <div class="flex-grow-1">
+                                        <h5>Verificar Tu Balance</h5>
+                                        <p>Comprueba que recibiste el ETH de test:</p>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h6>Balance Actual</h6>
+                                                        <h4 id="ethBalance" class="text-primary">-- ETH</h4>
+                                                        <button class="btn btn-outline-primary btn-sm" onclick="checkBalance()">
+                                                            <i class="fas fa-sync-alt"></i> Verificar Balance
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h6>Red Actual</h6>
+                                                        <h4 id="currentNetwork" class="text-info">-- Network</h4>
+                                                        <button class="btn btn-outline-info btn-sm" onclick="checkNetwork()">
+                                                            <i class="fas fa-network-wired"></i> Verificar Red
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paso 4: Probar BingoChain -->
+                        <div class="card step-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">4</div>
+                                    <div class="flex-grow-1">
+                                        <h5>¡Probar BingoChain en Sepolia!</h5>
+                                        <p>Una vez que tengas ETH de test, puedes usar BingoChain:</p>
+                                        
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-gift"></i>
+                                            <strong>¡Boletos GRATIS en Sepolia!</strong> En la red de test Sepolia, los boletos son completamente gratuitos. Solo pagas el gas de la transacción (muy poco).
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <a href="demo.html" class="btn btn-success btn-lg">
+                                                <i class="fas fa-rocket"></i> Ir a BingoChain Demo
+                                            </a>
+                                            <a href="mis-boletos.html" class="btn btn-outline-primary">
+                                                <i class="fas fa-ticket-alt"></i> Ver Mis Boletos NFT
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información Adicional -->
+                        <div class="card">
+                            <div class="card-body">
+                                <h5><i class="fas fa-question-circle"></i> Preguntas Frecuentes</h5>
+                                
+                                <div class="accordion" id="faqAccordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                                ¿Cuánto ETH de test necesito?
+                                            </button>
+                                        </h2>
+                                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body">
+                                                <strong>0.1 ETH de test es más que suficiente.</strong> Los boletos son gratis en Sepolia, solo pagas gas (~0.001-0.005 ETH por transacción).
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                                ¿Los NFTs funcionan igual que en mainnet?
+                                            </button>
+                                        </h2>
+                                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body">
+                                                <strong>¡Sí!</strong> Los NFTs en Sepolia funcionan exactamente igual que en mainnet. Aparecerán en tu wallet MetaMask y puedes verlos en OpenSea Testnet.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                                ¿Puedo usar mi billetera real?
+                                            </button>
+                                        </h2>
+                                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body">
+                                                <strong>¡Por supuesto!</strong> Sepolia usa la misma dirección que mainnet. Tu billetera <code>0x51F6EB8bF0FC46c783527136a3B659EDFA1719C7</code> funcionará perfectamente.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    
+    <script>
+        let web3 = null;
+        let account = null;
+
+        // Add Sepolia network automatically
+        async function addSepoliaNetwork() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask no detectado. Instala MetaMask primero.');
+                return;
+            }
+
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0xaa36a7', // 11155111 in hex
+                        chainName: 'Sepolia Test Network',
+                        rpcUrls: ['https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
+                        nativeCurrency: {
+                            name: 'Ethereum',
+                            symbol: 'ETH',
+                            decimals: 18
+                        },
+                        blockExplorerUrls: ['https://sepolia.etherscan.io']
+                    }]
+                });
+                alert('¡Red Sepolia agregada exitosamente! Cambia a Sepolia en MetaMask.');
+            } catch (error) {
+                console.error('Error adding Sepolia network:', error);
+                alert('Error agregando red Sepolia: ' + error.message);
+            }
+        }
+
+        // Connect wallet and show address
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    return false;
+                }
+
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    web3 = new Web3(window.ethereum);
+                    account = accounts[0];
+                    
+                    document.getElementById('userAddress').textContent = account;
+                    
+                    await checkBalance();
+                    await checkNetwork();
+                    
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                return false;
+            }
+        }
+
+        // Check ETH balance
+        async function checkBalance() {
+            if (!web3 || !account) {
+                const connected = await connectWallet();
+                if (!connected) return;
+            }
+
+            try {
+                const balance = await web3.eth.getBalance(account);
+                const ethBalance = web3.utils.fromWei(balance, 'ether');
+                document.getElementById('ethBalance').textContent = parseFloat(ethBalance).toFixed(4) + ' ETH';
+            } catch (error) {
+                console.error('Error checking balance:', error);
+                document.getElementById('ethBalance').textContent = 'Error';
+            }
+        }
+
+        // Check current network
+        async function checkNetwork() {
+            if (!web3) {
+                const connected = await connectWallet();
+                if (!connected) return;
+            }
+
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const networks = {
+                    '0xaa36a7': 'Sepolia ✅',
+                    '0x539': 'Ganache Local',
+                    '0x1': 'Ethereum Mainnet'
+                };
+                
+                const networkName = networks[chainId] || `Red ${parseInt(chainId, 16)}`;
+                document.getElementById('currentNetwork').textContent = networkName;
+            } catch (error) {
+                console.error('Error checking network:', error);
+                document.getElementById('currentNetwork').textContent = 'Error';
+            }
+        }
+
+        // Copy address to clipboard
+        function copyAddress() {
+            const address = document.getElementById('userAddress').textContent;
+            if (address && address !== 'Conecta MetaMask para verla') {
+                navigator.clipboard.writeText(address).then(() => {
+                    alert('Dirección copiada al portapapeles!');
+                });
+            } else {
+                alert('Conecta MetaMask primero');
+            }
+        }
+
+        // Auto-connect if wallet is available
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet();
+                    }
+                } catch (error) {
+                    console.log('No auto-connect available');
+                }
+            }
+        });
+
+        // Listen for account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    connectWallet();
+                } else {
+                    account = null;
+                    web3 = null;
+                    document.getElementById('userAddress').textContent = 'Conecta MetaMask para verla';
+                    document.getElementById('ethBalance').textContent = '-- ETH';
+                    document.getElementById('currentNetwork').textContent = '-- Network';
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                checkNetwork();
+                checkBalance();
+            });
+        }
+    </script>
+</body>
+</html>

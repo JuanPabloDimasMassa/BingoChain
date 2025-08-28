@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BingoChain - Mis Boletos NFT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .card { box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: none; }
+        .ticket-card { 
+            background: linear-gradient(45deg, #fff, #f8f9fa);
+            border: 2px solid #007bff;
+            margin-bottom: 15px;
+        }
+        .ticket-numbers {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .number-badge {
+            background: #007bff;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-minted { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="demo.html"><i class="fas fa-dice me-2"></i>BingoChain</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="demo.html"><i class="fas fa-home"></i> Sorteos</a>
+                <a class="nav-link active" href="#"><i class="fas fa-ticket-alt"></i> Mis Boletos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-ticket-alt"></i> Mis Boletos NFT</h5>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span id="ticketCount">Cargando boletos...</span>
+                            <button class="btn btn-primary btn-sm" onclick="refreshTickets()">
+                                <i class="fas fa-sync-alt"></i> Actualizar
+                            </button>
+                        </div>
+
+                        <div id="ticketsList">
+                            <div class="text-center p-4">
+                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                <p class="mt-2">Cargando tus boletos...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title"><i class="fas fa-wallet"></i> Estado del Wallet</h6>
+                        <div id="walletInfo">
+                            <span class="text-muted">Conecta tu wallet para ver boletos</span>
+                        </div>
+                        <button id="connectBtn" class="btn btn-outline-primary btn-sm mt-2" onclick="connectWallet()">
+                            <i class="fas fa-link"></i> Conectar MetaMask
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title"><i class="fas fa-info-circle"></i> Información</h6>
+                        <div class="small">
+                            <p><strong>Smart Contract:</strong><br>
+                            <code class="small">0x345ca3e014aaf5dca488057592ee47305d9b3e10</code></p>
+                            
+                            <p><strong>Red:</strong> Ganache Local (1337)</p>
+                            
+                            <p><strong>Estado de Boletos:</strong></p>
+                            <ul>
+                                <li><span class="status-badge status-pending">Pendiente</span> - En proceso de minteo</li>
+                                <li><span class="status-badge status-minted">NFT Creado</span> - Disponible en wallet</li>
+                                <li><span class="status-badge status-error">Error</span> - Falló el minteo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <script>
+        let web3 = null;
+        let account = null;
+        let contract = null;
+        
+        const CONTRACT_ADDRESS = '0xAa588d3737B611baFD7bD713445b314BD453a5C8';
+        const BACKEND_URL = 'http://localhost:3500';
+        const GANACHE_CHAIN_ID = '0x539';
+
+        // Simplified contract ABI - only what we need
+        const CONTRACT_ABI = [
+            {
+                "inputs": [{"type": "uint256", "name": "tokenId"}],
+                "name": "getTicketByTokenId",
+                "outputs": [
+                    {"type": "uint256", "name": "ticketId"},
+                    {"type": "uint256", "name": "lotteryId"},
+                    {"type": "address", "name": "owner"},
+                    {"type": "uint256[]", "name": "chosenNumbers"},
+                    {"type": "uint256", "name": "purchaseTime"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "address", "name": "player"}],
+                "name": "getPlayerTokens",
+                "outputs": [{"type": "uint256[]", "name": ""}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"type": "uint256", "name": "tokenId"}],
+                "name": "tokenURI",
+                "outputs": [{"type": "string", "name": ""}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask no detectado. Instala MetaMask para continuar.');
+                    return;
+                }
+
+                // Request account access
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length === 0) {
+                    alert('No se encontraron cuentas en MetaMask');
+                    return;
+                }
+
+                // Initialize Web3
+                web3 = new Web3(window.ethereum);
+                account = accounts[0];
+
+                // Check chain
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== GANACHE_CHAIN_ID) {
+                    alert('Cambia a la red Ganache (Chain ID: 1337) para ver tus boletos NFT');
+                    return;
+                }
+
+                // Initialize contract
+                contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
+                // Update UI
+                updateWalletInfo();
+                await loadTickets();
+
+                // Setup event listeners
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', () => window.location.reload());
+
+            } catch (error) {
+                console.error('Error conectando wallet:', error);
+                alert('Error conectando MetaMask: ' + error.message);
+            }
+        }
+
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                // User disconnected
+                account = null;
+                web3 = null;
+                contract = null;
+                updateWalletInfo();
+                document.getElementById('ticketsList').innerHTML = '<p class="text-muted text-center">Conecta tu wallet para ver boletos</p>';
+            } else {
+                // User switched accounts
+                account = accounts[0];
+                updateWalletInfo();
+                loadTickets();
+            }
+        }
+
+        function updateWalletInfo() {
+            const walletInfo = document.getElementById('walletInfo');
+            const connectBtn = document.getElementById('connectBtn');
+
+            if (account) {
+                walletInfo.innerHTML = `
+                    <div class="small">
+                        <strong>Conectado:</strong><br>
+                        <code>${account.substring(0, 6)}...${account.substring(38)}</code>
+                    </div>
+                `;
+                connectBtn.style.display = 'none';
+            } else {
+                walletInfo.innerHTML = '<span class="text-muted">Conecta tu wallet para ver boletos</span>';
+                connectBtn.style.display = 'block';
+            }
+        }
+
+        async function loadTickets() {
+            if (!account || !contract) {
+                document.getElementById('ticketsList').innerHTML = '<p class="text-muted text-center">Conecta tu wallet para ver boletos</p>';
+                return;
+            }
+
+            try {
+                document.getElementById('ticketsList').innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-2">Cargando tus boletos NFT...</p>
+                    </div>
+                `;
+
+                // Get tokens owned by user from smart contract
+                const tokenIds = await contract.methods.getPlayerTokens(account).call();
+                
+                if (tokenIds.length === 0) {
+                    document.getElementById('ticketsList').innerHTML = `
+                        <div class="text-center p-4">
+                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                            <h6>No tienes boletos NFT</h6>
+                            <p class="text-muted">Compra boletos en la página principal para verlos aquí.</p>
+                            <a href="demo.html" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart"></i> Comprar Boletos
+                            </a>
+                        </div>
+                    `;
+                    document.getElementById('ticketCount').textContent = 'No tienes boletos';
+                    return;
+                }
+
+                // Load ticket details
+                const tickets = [];
+                for (const tokenId of tokenIds) {
+                    try {
+                        const ticketData = await contract.methods.getTicketByTokenId(tokenId).call();
+                        const tokenURI = await contract.methods.tokenURI(tokenId).call();
+                        
+                        tickets.push({
+                            tokenId: tokenId,
+                            ticketId: ticketData.ticketId,
+                            lotteryId: ticketData.lotteryId,
+                            owner: ticketData.owner,
+                            chosenNumbers: ticketData.chosenNumbers,
+                            purchaseTime: ticketData.purchaseTime,
+                            tokenURI: tokenURI,
+                            status: 'minted'
+                        });
+                    } catch (error) {
+                        console.error(`Error loading ticket ${tokenId}:`, error);
+                        tickets.push({
+                            tokenId: tokenId,
+                            status: 'error',
+                            error: error.message
+                        });
+                    }
+                }
+
+                displayTickets(tickets);
+                document.getElementById('ticketCount').textContent = `Tienes ${tickets.length} boleto(s) NFT`;
+
+            } catch (error) {
+                console.error('Error cargando boletos:', error);
+                document.getElementById('ticketsList').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error cargando boletos: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function displayTickets(tickets) {
+            const ticketsList = document.getElementById('ticketsList');
+            
+            if (tickets.length === 0) {
+                ticketsList.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                        <h6>No tienes boletos NFT</h6>
+                        <p class="text-muted">Compra boletos en la página principal para verlos aquí.</p>
+                        <a href="demo.html" class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> Comprar Boletos
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            tickets.forEach(ticket => {
+                if (ticket.status === 'error') {
+                    html += `
+                        <div class="ticket-card card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6>Token ID: ${ticket.tokenId}</h6>
+                                    <span class="status-badge status-error">Error</span>
+                                </div>
+                                <p class="text-muted small">Error: ${ticket.error}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const purchaseDate = new Date(ticket.purchaseTime * 1000).toLocaleString();
+                    html += `
+                        <div class="ticket-card card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6><i class="fas fa-ticket-alt"></i> Boleto NFT #${ticket.ticketId}</h6>
+                                    <span class="status-badge status-minted">NFT Creado</span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="small mb-1"><strong>Números elegidos:</strong></p>
+                                        <div class="ticket-numbers">
+                                            ${ticket.chosenNumbers.map(num => 
+                                                `<div class="number-badge">${num.toString().padStart(2, '0')}</div>`
+                                            ).join('')}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="small">
+                                            <p class="mb-1"><strong>Sorteo:</strong> #${ticket.lotteryId}</p>
+                                            <p class="mb-1"><strong>Token ID:</strong> ${ticket.tokenId}</p>
+                                            <p class="mb-1"><strong>Comprado:</strong> ${purchaseDate}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-2">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewInMetaMask('${ticket.tokenId}')">
+                                        <i class="fas fa-external-link-alt"></i> Ver en MetaMask
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="viewTokenURI('${ticket.tokenURI}')">
+                                        <i class="fas fa-code"></i> Ver Metadata
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            ticketsList.innerHTML = html;
+        }
+
+        async function viewInMetaMask(tokenId) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_watchAsset',
+                    params: {
+                        type: 'ERC721',
+                        options: {
+                            address: CONTRACT_ADDRESS,
+                            tokenId: tokenId,
+                        },
+                    },
+                });
+            } catch (error) {
+                console.error('Error adding NFT to MetaMask:', error);
+                alert('Error agregando NFT a MetaMask. Agrega manualmente:\n\nContrato: ' + CONTRACT_ADDRESS + '\nToken ID: ' + tokenId);
+            }
+        }
+
+        function viewTokenURI(tokenURI) {
+            alert('Token URI:\n\n' + tokenURI);
+        }
+
+        async function refreshTickets() {
+            if (account && contract) {
+                await loadTickets();
+            } else {
+                alert('Conecta tu wallet primero');
+            }
+        }
+
+        // Auto-connect if already connected
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet();
+                    }
+                } catch (error) {
+                    console.log('No auto-connect available');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

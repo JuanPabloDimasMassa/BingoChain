@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BingoChain - Usar Billetera Real</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .card { box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: none; }
+        .step-number {
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .highlight { background: #d4edda; padding: 5px; border-radius: 3px; }
+        .wallet-address { 
+            background: #e3f2fd; 
+            padding: 10px; 
+            border-radius: 5px; 
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="demo.html"><i class="fas fa-dice me-2"></i>BingoChain</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="demo.html"><i class="fas fa-home"></i> Demo</a>
+                <a class="nav-link" href="mis-boletos.html"><i class="fas fa-ticket-alt"></i> Mis Boletos</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title text-center mb-4">
+                            <i class="fas fa-wallet text-success"></i>
+                            Usar tu Billetera Real con BingoChain
+                        </h4>
+                        
+                        <div class="alert alert-success">
+                            <i class="fas fa-gift"></i>
+                            <strong>¡NUEVA CONFIGURACIÓN!</strong> Los boletos ahora son <strong>COMPLETAMENTE GRATIS</strong> en Ganache Local. Solo necesitas importar tu billetera real.
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Tu dirección:</strong> 
+                            <div class="wallet-address mt-2">
+                                0x51F6EB8bF0FC46c783527136a3B659EDFA1719C7
+                            </div>
+                        </div>
+
+                        <!-- Método 1: Importar Clave Privada -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">1</div>
+                                    <div class="flex-grow-1">
+                                        <h5>🔑 Importar tu Billetera Real a MetaMask</h5>
+                                        <p>Usa tu clave privada real para importar tu billetera en la red Ganache:</p>
+                                        
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <strong>Seguridad:</strong> Solo usa tu clave privada real si confías en este entorno de desarrollo. Como alternativa, puedes crear una billetera temporal con la misma dirección.
+                                        </div>
+
+                                        <h6>Pasos para importar:</h6>
+                                        <ol>
+                                            <li>Abre MetaMask</li>
+                                            <li>Haz clic en el ícono de cuenta (arriba derecha)</li>
+                                            <li>Selecciona <strong>"Importar cuenta"</strong></li>
+                                            <li>Pega tu clave privada real</li>
+                                            <li>Asegúrate de estar en la red <strong>Ganache Local (1337)</strong></li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Método 2: Usar Cuenta de Ganache -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">2</div>
+                                    <div class="flex-grow-1">
+                                        <h5>🚀 Alternativa: Cuenta de Ganache con 100 ETH</h5>
+                                        <p>Si prefieres no usar tu clave privada real, usa una de las cuentas de Ganache:</p>
+                                        
+                                        <div class="code-block">
+                                            <strong>Dirección:</strong> 0x627306090abaB3A6e1400e9345bC60c78a8BEf57<br>
+                                            <strong>Clave Privada:</strong> 0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3<br>
+                                            <strong>Balance:</strong> 100 ETH
+                                        </div>
+
+                                        <button class="btn btn-primary" onclick="importGanacheAccount()">
+                                            <i class="fas fa-download"></i> Importar Cuenta de Ganache
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuración de Red -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">3</div>
+                                    <div class="flex-grow-1">
+                                        <h5>🌐 Configurar Red Ganache</h5>
+                                        <p>Asegúrate de que MetaMask esté conectado a la red correcta:</p>
+                                        
+                                        <div class="code-block">
+                                            <strong>Nombre de Red:</strong> Ganache Local<br>
+                                            <strong>RPC URL:</strong> http://127.0.0.1:8545<br>
+                                            <strong>Chain ID:</strong> 1337<br>
+                                            <strong>Símbolo:</strong> ETH
+                                        </div>
+
+                                        <button class="btn btn-success" onclick="addGanacheNetwork()">
+                                            <i class="fas fa-plus"></i> Agregar Red Ganache
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Verificación -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="step-number">4</div>
+                                    <div class="flex-grow-1">
+                                        <h5>✅ Verificar Configuración</h5>
+                                        <p>Comprueba que todo esté configurado correctamente:</p>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h6>Balance ETH</h6>
+                                                        <h4 id="ethBalance" class="text-primary">-- ETH</h4>
+                                                        <button class="btn btn-outline-primary btn-sm" onclick="checkBalance()">
+                                                            <i class="fas fa-sync-alt"></i> Verificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h6>Red Actual</h6>
+                                                        <h4 id="currentNetwork" class="text-info">-- Red</h4>
+                                                        <button class="btn btn-outline-info btn-sm" onclick="checkNetwork()">
+                                                            <i class="fas fa-network-wired"></i> Verificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="card bg-light">
+                                                    <div class="card-body text-center">
+                                                        <h6>Cuenta Activa</h6>
+                                                        <h6 id="activeAccount" class="text-success small">-- Cuenta</h6>
+                                                        <button class="btn btn-outline-success btn-sm" onclick="checkAccount()">
+                                                            <i class="fas fa-user"></i> Verificar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Probar BingoChain -->
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5><i class="fas fa-rocket"></i> ¡Listo para Probar!</h5>
+                                <p>Una vez configurado, puedes usar BingoChain con boletos <strong>COMPLETAMENTE GRATIS</strong>:</p>
+                                
+                                <div class="alert alert-success">
+                                    <i class="fas fa-gift"></i>
+                                    <strong>Boletos GRATIS:</strong> No pagas nada por los boletos, solo gas mínimo (~0.001 ETH por transacción)
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-block">
+                                    <a href="demo.html" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-dice"></i> Ir a BingoChain Demo
+                                    </a>
+                                    <a href="mis-boletos.html" class="btn btn-outline-success btn-lg">
+                                        <i class="fas fa-ticket-alt"></i> Ver Mis Boletos NFT
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    
+    <script>
+        let web3 = null;
+        let account = null;
+
+        // Import Ganache account automatically
+        async function importGanacheAccount() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask no detectado. Instala MetaMask primero.');
+                return;
+            }
+
+            const ganachePrivateKey = '0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3';
+            
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_importAccount',
+                    params: [ganachePrivateKey]
+                });
+                alert('¡Cuenta de Ganache importada exitosamente!');
+            } catch (error) {
+                console.error('Error importing account:', error);
+                alert(`No se pudo importar automáticamente. Hazlo manualmente:\n\n1. MetaMask → Cuenta → Importar cuenta\n2. Pega esta clave privada:\n${ganachePrivateKey}`);
+            }
+        }
+
+        // Add Ganache network
+        async function addGanacheNetwork() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask no detectado. Instala MetaMask primero.');
+                return;
+            }
+
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: '0x539', // 1337 in hex
+                        chainName: 'Ganache Local',
+                        rpcUrls: ['http://127.0.0.1:8545'],
+                        nativeCurrency: {
+                            name: 'Ethereum',
+                            symbol: 'ETH',
+                            decimals: 18
+                        }
+                    }]
+                });
+                alert('¡Red Ganache agregada exitosamente!');
+            } catch (error) {
+                console.error('Error adding Ganache network:', error);
+                alert('Error agregando red Ganache: ' + error.message);
+            }
+        }
+
+        // Connect wallet
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    return false;
+                }
+
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                if (accounts.length > 0) {
+                    web3 = new Web3(window.ethereum);
+                    account = accounts[0];
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                return false;
+            }
+        }
+
+        // Check ETH balance
+        async function checkBalance() {
+            if (!web3 || !account) {
+                const connected = await connectWallet();
+                if (!connected) {
+                    alert('Conecta MetaMask primero');
+                    return;
+                }
+            }
+
+            try {
+                const balance = await web3.eth.getBalance(account);
+                const ethBalance = web3.utils.fromWei(balance, 'ether');
+                document.getElementById('ethBalance').textContent = parseFloat(ethBalance).toFixed(4) + ' ETH';
+            } catch (error) {
+                console.error('Error checking balance:', error);
+                document.getElementById('ethBalance').textContent = 'Error';
+            }
+        }
+
+        // Check current network
+        async function checkNetwork() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask no detectado');
+                    return;
+                }
+
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const networks = {
+                    '0x539': 'Ganache Local ✅',
+                    '0xaa36a7': 'Sepolia Testnet',
+                    '0x1': 'Ethereum Mainnet'
+                };
+                
+                const networkName = networks[chainId] || `Red ${parseInt(chainId, 16)}`;
+                document.getElementById('currentNetwork').textContent = networkName;
+            } catch (error) {
+                console.error('Error checking network:', error);
+                document.getElementById('currentNetwork').textContent = 'Error';
+            }
+        }
+
+        // Check active account
+        async function checkAccount() {
+            if (!account) {
+                const connected = await connectWallet();
+                if (!connected) {
+                    alert('Conecta MetaMask primero');
+                    return;
+                }
+            }
+
+            const shortAddress = `${account.substring(0, 6)}...${account.substring(38)}`;
+            document.getElementById('activeAccount').textContent = shortAddress;
+        }
+
+        // Auto-connect if wallet is available
+        window.addEventListener('load', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet();
+                        await checkBalance();
+                        await checkNetwork();
+                        await checkAccount();
+                    }
+                } catch (error) {
+                    console.log('No auto-connect available');
+                }
+            }
+        });
+
+        // Listen for account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    connectWallet().then(() => {
+                        checkBalance();
+                        checkAccount();
+                    });
+                } else {
+                    account = null;
+                    web3 = null;
+                    document.getElementById('ethBalance').textContent = '-- ETH';
+                    document.getElementById('activeAccount').textContent = '-- Cuenta';
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                checkNetwork();
+                if (account) checkBalance();
+            });
+        }
+    </script>
+</body>
+</html>

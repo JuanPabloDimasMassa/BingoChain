@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: bingochain-postgres
+    environment:
+      POSTGRES_DB: bingo_crypto
+      POSTGRES_USER: Postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - bingochain-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U Postgres -d bingo_crypto"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Ganache (Local Ethereum Network)
+  ganache:
+    image: trufflesuite/ganache:latest
+    container_name: bingochain-ganache
+    ports:
+      - "8545:8545"
+    command: >
+      ganache
+      --host 0.0.0.0
+      --port 8545
+      --networkId 1337
+      --chainId 1337
+      --gasLimit 10000000
+      --gasPrice 20000000000
+      --accounts 10
+      --deterministic
+      --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
+      --unlock 0
+      --unlock 1
+      --unlock 2
+    networks:
+      - bingochain-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8545 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend Java Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bingochain-backend
+    ports:
+      - "3500:3500"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bingo_crypto
+      - SPRING_DATASOURCE_USERNAME=Postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - BLOCKCHAIN_ETHEREUM_NETWORK_URL=http://ganache:8545
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ganache:
+        condition: service_healthy
+    networks:
+      - bingochain-network
+    volumes:
+      - backend_logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3500/api/v1/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Frontend Python Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: bingochain-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - FLASK_ENV=production
+      - BACKEND_API_URL=http://backend:3500/api/v1
+      - WEB3_PROVIDER_URL=http://ganache:8545
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - bingochain-network
+    restart: unless-stopped
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    container_name: bingochain-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - bingochain-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # PgAdmin for database management (optional, for development)
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: bingochain-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bingochain.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - bingochain-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+    profiles:
+      - development
+
+networks:
+  bingochain-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  backend_logs:
+    driver: local
