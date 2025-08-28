@@ -273,4 +273,4 @@ Este proyecto está bajo la Licencia MIT - ver [LICENSE](LICENSE) para detalles.
 ### 🎉 ¡Disfruta jugando BingoChain!
 
 **¿Problemas?** Abre un [Issue](https://github.com/tu-usuario/BingoChain/issues)
-**¿Sugerencias?** Envía un [Pull Request](https://github.com/tu-usuario/BingoChain/pulls)
+**¿Sugerencias?** Envía un [Pull Request](https://github.com/tu-usuario/BingoChain/pulls)# BingoChain
