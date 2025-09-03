@@ -1,0 +1,37 @@
+{
+  "name": "bingochain-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for BingoChain - Decentralized Bingo Game",
+  "main": "index.js",
+  "scripts": {
+    "compile": "truffle compile",
+    "migrate": "truffle migrate",
+    "test": "truffle test",
+    "console": "truffle console",
+    "develop": "truffle develop",
+    "ganache": "ganache-cli -p 8545 -m 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'",
+    "deploy:development": "truffle migrate --network development",
+    "deploy:testnet": "truffle migrate --network testnet",
+    "verify": "truffle run verify"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "solidity",
+    "bingo",
+    "smart-contracts",
+    "dapp"
+  ],
+  "author": "BingoChain Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "truffle": "^5.11.5",
+    "ganache-cli": "^6.12.2",
+    "web3": "^4.2.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

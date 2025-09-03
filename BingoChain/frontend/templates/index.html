@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}BingoChain - Sorteos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold text-primary">
+                <i class="fas fa-dice me-3"></i>
+                BingoChain - Sorteos de Lotería
+            </h1>
+            <p class="lead">Participa en sorteos semanales de lotería descentralizada</p>
+        </div>
+    </div>
+
+    <!-- Wallet Connection Required -->
+    <div id="walletRequired" class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning" role="alert">
+                <h4 class="alert-heading"><i class="fas fa-wallet"></i> Conecta tu Wallet</h4>
+                <p>Para participar en los sorteos y ver tus boletos, necesitas conectar tu wallet MetaMask.</p>
+                <hr>
+                <button id="connectWalletMainBtn" class="btn btn-primary">
+                    <i class="fas fa-wallet"></i> Conectar MetaMask
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lotteries Section -->
+    <div id="lotteriesSection" style="display: none;">
+        <!-- Active Lottery -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3><i class="fas fa-ticket-alt text-success"></i> Sorteo Activo</h3>
+                <div id="activeLottery">
+                    <!-- Active lottery will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- All Lotteries -->
+        <div class="row">
+            <div class="col-12">
+                <h3><i class="fas fa-history"></i> Todos los Sorteos</h3>
+                <div id="allLotteries" class="row">
+                    <!-- All lotteries will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingLotteries" class="text-center py-5" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3">Cargando sorteos...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/lottery.js') }}"></script>
+<script>
+// Initialize lottery page
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize wallet connection listeners
+    if (window.walletManager) {
+        // Listen for wallet connection events
+        document.getElementById('connectWalletMainBtn').addEventListener('click', function() {
+            walletManager.connectWallet();
+        });
+        
+        // Check if wallet is already connected
+        if (walletManager.isWalletConnected()) {
+            showLotteriesSection();
+        } else {
+            showWalletRequired();
+        }
+    }
+    
+    // Override wallet manager update UI function to show/hide sections
+    if (window.walletManager) {
+        const originalUpdateUI = walletManager.updateUI;
+        walletManager.updateUI = function() {
+            originalUpdateUI.call(this);
+            
+            if (this.isConnected && this.account) {
+                showLotteriesSection();
+            } else {
+                showWalletRequired();
+            }
+        };
+    }
+});
+
+function showWalletRequired() {
+    document.getElementById('walletRequired').style.display = 'block';
+    document.getElementById('lotteriesSection').style.display = 'none';
+    document.getElementById('myTicketsLink').style.display = 'none';
+}
+
+function showLotteriesSection() {
+    document.getElementById('walletRequired').style.display = 'none';
+    document.getElementById('lotteriesSection').style.display = 'block';
+    document.getElementById('myTicketsLink').style.display = 'block';
+    
+    // Load lotteries
+    loadLotteries();
+}
+</script>
+{% endblock %}

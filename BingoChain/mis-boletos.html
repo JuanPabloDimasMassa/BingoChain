@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎫 Mis Boletos NFT - BingoChain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh; 
+            color: white; 
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Fondo animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.05)"/><stop offset="100%" style="stop-color:rgba(255,255,255,0)"/></radialGradient></defs><circle cx="200" cy="200" r="100" fill="url(%23a)"><animate attributeName="r" values="100;150;100" dur="4s" repeatCount="indefinite"/></circle><circle cx="800" cy="300" r="80" fill="url(%23a)"><animate attributeName="r" values="80;120;80" dur="6s" repeatCount="indefinite"/></circle><circle cx="500" cy="700" r="120" fill="url(%23a)"><animate attributeName="r" values="120;170;120" dur="5s" repeatCount="indefinite"/></circle></svg>') center/cover;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header { 
+            text-align: center; 
+            margin-bottom: 50px; 
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .header h1 { 
+            font-size: clamp(2.5em, 5vw, 4em); 
+            margin-bottom: 20px; 
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .back-btn { 
+            position: fixed; 
+            top: 30px; 
+            left: 30px; 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            padding: 15px 25px; 
+            border-radius: 50px; 
+            text-decoration: none; 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 600;
+            font-size: 16px;
+            z-index: 1000;
+        }
+        
+        .back-btn:hover { 
+            background: rgba(255,255,255,0.25); 
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .card { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(20px); 
+            padding: 40px; 
+            border-radius: 25px; 
+            margin-bottom: 40px; 
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FF6B6B, #667eea);
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .card h3 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #FFD700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .btn { 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            color: white; 
+            border: none; 
+            padding: 18px 30px; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            margin: 10px; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:hover { 
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3); 
+        }
+        .ticket-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+        .ticket-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .ticket-id { font-size: 1.2em; font-weight: bold; color: #ffd700; }
+                 .ticket-status { padding: 5px 12px; border-radius: 20px; font-size: 0.9em; font-weight: bold; }
+         .status-ganador { background: #4CAF50; color: white; }
+         .status-en-juego { background: #FF9800; color: white; }
+         .status-perdido { background: #f44336; color: white; }
+        .numbers-display { display: flex; gap: 10px; margin: 15px 0; justify-content: center; }
+        .number-ball { 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .ticket-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+        .info-item { text-align: center; }
+        .info-label { font-size: 0.9em; opacity: 0.8; margin-bottom: 5px; }
+        .info-value { font-size: 1.1em; font-weight: bold; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stat-card { text-align: center; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; }
+        .stat-number { font-size: 2em; font-weight: bold; color: #ffd700; margin-bottom: 5px; }
+        .stat-label { font-size: 0.9em; color: rgba(255, 255, 255, 0.8); }
+        .status-message { 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin: 15px 0; 
+            text-align: center; 
+            font-weight: bold;
+            border-left: 4px solid;
+        }
+        .status-success { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; }
+        .status-error { background: rgba(244, 67, 54, 0.2); border-color: #f44336; }
+        .status-warning { background: rgba(255, 152, 0, 0.2); border-color: #FF9800; }
+        .status-info { background: rgba(33, 150, 243, 0.2); border-color: #2196F3; }
+                 .hidden { display: none; }
+         
+         /* Animaciones */
+         @keyframes fadeInDown {
+             from {
+                 opacity: 0;
+                 transform: translateY(-50px);
+             }
+             to {
+                 opacity: 1;
+                 transform: translateY(0);
+             }
+         }
+         
+         @keyframes fadeInUp {
+             from {
+                 opacity: 0;
+                 transform: translateY(50px);
+             }
+             to {
+                 opacity: 1;
+                 transform: translateY(0);
+             }
+         }
+         
+         @keyframes gradientShift {
+             0% { background-position: 0% 50%; }
+             50% { background-position: 100% 50%; }
+             100% { background-position: 0% 50%; }
+         }
+         
+         @keyframes glow {
+             from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+             to { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+         }
+         
+         @keyframes pulse {
+             0%, 100% { transform: scale(1); }
+             50% { transform: scale(1.05); }
+         }
+         
+         /* Responsive */
+         @media (max-width: 768px) {
+             .container {
+                 padding: 0 10px;
+             }
+             
+             .card {
+                 padding: 30px 20px;
+             }
+             
+             .back-btn {
+                 top: 20px;
+                 left: 20px;
+                 padding: 12px 20px;
+             }
+             
+             .stats-grid {
+                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+             }
+             
+             .ticket-info {
+                 grid-template-columns: 1fr;
+             }
+         }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Volver al Inicio
+    </a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Mis Boletos NFT</h1>
+            <p>Gestiona tus boletos del Sorteo Semanal #1</p>
+        </div>
+
+        <!-- Controles -->
+        <div class="card">
+            <h3><i class="fas fa-link"></i> Conexión</h3>
+            <div id="wallet-info" style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 15px; margin: 20px 0; font-family: 'Courier New', monospace;">
+                <p style="margin: 10px 0;"><strong><i class="fas fa-wallet"></i> Cuenta:</strong> <span id="account-display">No conectada</span></p>
+            </div>
+            <button class="btn" onclick="connectWallet()">
+                <i class="fab fa-ethereum"></i> Conectar MetaMask
+            </button>
+            <button class="btn" onclick="loadTickets()">
+                <i class="fas fa-sync-alt"></i> Recargar Boletos
+            </button>
+        </div>
+
+                 <!-- Estadísticas -->
+         <div class="card">
+             <h3><i class="fas fa-chart-bar"></i> Estadísticas</h3>
+             <div class="stats-grid">
+                 <div class="stat-card">
+                     <div style="font-size: 2.5em; margin-bottom: 15px; color: #FFD700;"><i class="fas fa-ticket-alt"></i></div>
+                     <div class="stat-number" id="total-tickets">0</div>
+                     <div class="stat-label">Boletos Totales</div>
+                 </div>
+                 <div class="stat-card">
+                     <div style="font-size: 2.5em; margin-bottom: 15px; color: #4CAF50;"><i class="fas fa-trophy"></i></div>
+                     <div class="stat-number" id="ganador-tickets" style="color: #4CAF50;">0</div>
+                     <div class="stat-label">Ganadores</div>
+                 </div>
+                 <div class="stat-card">
+                     <div style="font-size: 2.5em; margin-bottom: 15px; color: #FF9800;"><i class="fas fa-gamepad"></i></div>
+                     <div class="stat-number" id="en-juego-tickets" style="color: #FF9800;">0</div>
+                     <div class="stat-label">En Juego</div>
+                 </div>
+                 <div class="stat-card">
+                     <div style="font-size: 2.5em; margin-bottom: 15px; color: #f44336;"><i class="fas fa-times-circle"></i></div>
+                     <div class="stat-number" id="perdido-tickets" style="color: #f44336;">0</div>
+                     <div class="stat-label">Perdidos</div>
+                 </div>
+                 <div class="stat-card">
+                     <div style="font-size: 2.5em; margin-bottom: 15px; color: #FFD700;"><i class="fas fa-bullseye"></i></div>
+                     <div class="stat-number" id="total-matches">0</div>
+                     <div class="stat-label">Aciertos Totales</div>
+                 </div>
+             </div>
+         </div>
+
+        <!-- Boletos -->
+        <div class="card">
+            <h3><i class="fas fa-ticket-alt"></i> Tus Boletos NFT</h3>
+            <div id="tickets-container">
+                <div style="text-align: center; padding: 50px; color: rgba(255,255,255,0.7);">
+                    <div style="font-size: 4em; margin-bottom: 20px; color: #FFD700;"><i class="fas fa-link"></i></div>
+                    <h3 style="font-size: 1.5em; margin-bottom: 15px;">Conecta tu billetera</h3>
+                    <p style="font-size: 1.1em;">Conecta MetaMask para ver tus boletos NFT</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div id="status-messages"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script>
+        // Configuración
+        const CONFIG = {
+            CONTRACT_ADDRESS: '0x345cA3e014Aaf5dcA488057592ee47305D9B3e10',
+            GANACHE_CHAIN_ID: '0x539'
+        };
+
+        // ABI actualizado con las funciones correctas del contrato
+        const CONTRACT_ABI = [
+            {"inputs": [{"internalType": "address", "name": "owner", "type": "address"}], "name": "balanceOf", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [{"internalType": "address", "name": "_player", "type": "address"}], "name": "getAllPlayerTickets", "outputs": [{"internalType": "uint256[]", "name": "", "type": "uint256[]"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [{"internalType": "uint256", "name": "_ticketId", "type": "uint256"}], "name": "getTicket", "outputs": [{"internalType": "uint256", "name": "ticketId", "type": "uint256"}, {"internalType": "uint256", "name": "lotteryId", "type": "uint256"}, {"internalType": "address", "name": "owner", "type": "address"}, {"internalType": "uint8[6]", "name": "chosenNumbers", "type": "uint8[6]"}, {"internalType": "uint256", "name": "matchedNumbers", "type": "uint256"}, {"internalType": "bool", "name": "isWinner", "type": "bool"}, {"internalType": "uint256", "name": "purchaseTime", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [{"internalType": "uint256", "name": "tokenId", "type": "uint256"}], "name": "tokenURI", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "stateMutability": "view", "type": "function"}
+        ];
+
+        // Variables globales
+        let web3, contract, userAccount;
+        let userTickets = [];
+
+        // Inicialización
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (typeof Web3 !== 'undefined') {
+                    initializeApp();
+                } else {
+                    showMessage('❌ Error cargando Web3. Recarga la página.', 'error');
+                }
+            }, 500);
+        });
+
+        function initializeApp() {
+            if (typeof window.ethereum !== 'undefined') {
+                web3 = new Web3(window.ethereum);
+                contract = new web3.eth.Contract(CONTRACT_ABI, CONFIG.CONTRACT_ADDRESS);
+                console.log('✅ Web3 y contrato inicializados');
+                
+                // Verificar si ya está conectado
+                checkExistingConnection();
+            } else {
+                showMessage('❌ MetaMask no detectado. Instala MetaMask.', 'error');
+            }
+        }
+
+        async function checkExistingConnection() {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    onAccountConnected(accounts[0]);
+                }
+            } catch (error) {
+                console.log('No hay conexión previa');
+            }
+        }
+
+        async function connectWallet() {
+            try {
+                showMessage('🔗 Conectando MetaMask...', 'info');
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                onAccountConnected(accounts[0]);
+            } catch (error) {
+                console.error('Error conectando:', error);
+                showMessage('❌ Error conectando MetaMask', 'error');
+            }
+        }
+
+        async function onAccountConnected(account) {
+            userAccount = account;
+            console.log('👤 Cuenta conectada:', account);
+            
+            document.getElementById('account-display').textContent = 
+                `${account.substring(0, 6)}...${account.substring(38)}`;
+            
+            showMessage('✅ MetaMask conectado correctamente', 'success');
+            await loadTickets();
+        }
+
+        async function loadTickets() {
+            if (!userAccount || !contract) {
+                showMessage('Por favor conecta tu billetera primero', 'error');
+                return;
+            }
+
+            try {
+                showMessage('🔄 Cargando tus boletos NFT...', 'info');
+                console.log('Cargando tickets para:', userAccount);
+                
+                // Primero verificar si la cuenta tiene NFTs
+                const balance = await contract.methods.balanceOf(userAccount).call();
+                console.log('Balance de NFTs:', balance);
+                
+                if (balance === '0' || balance === 0) {
+                    displayNoTickets();
+                    updateStats(0, 0, 0, 0, 0);
+                    showMessage('No tienes boletos NFT aún. ¡Compra tu primer boleto!', 'warning');
+                    return;
+                }
+                
+                // Usar getAllPlayerTickets para obtener los IDs de tickets del jugador
+                let ticketIds;
+                
+                try {
+                    ticketIds = await contract.methods.getAllPlayerTickets(userAccount).call();
+                    console.log('IDs de tickets encontrados:', ticketIds);
+                } catch (error) {
+                    console.warn('Error obteniendo tickets, intentando método alternativo:', error);
+                    // Si getAllPlayerTickets falla, intentar obtener tickets manualmente
+                    ticketIds = [];
+                    // En este caso, no podemos obtener los tickets automáticamente
+                    // El usuario necesitará comprar nuevos boletos
+                    displayNoTickets();
+                    updateStats(0, 0, 0, 0, 0);
+                    showMessage('No se pudieron cargar los boletos. Esto puede ser porque el contrato se actualizó. ¡Compra nuevos boletos!', 'warning');
+                    return;
+                }
+                
+                if (!ticketIds || ticketIds.length === 0) {
+                    displayNoTickets();
+                    updateStats(0, 0, 0, 0, 0);
+                    showMessage('No tienes boletos NFT aún. ¡Compra tu primer boleto!', 'warning');
+                    return;
+                }
+
+                // Obtener detalles de cada ticket usando getTicket
+                userTickets = [];
+                for (const ticketId of ticketIds) {
+                    try {
+                        console.log('Obteniendo detalles del ticket:', ticketId);
+                        const ticket = await contract.methods.getTicket(ticketId).call();
+                        console.log('Detalles del ticket:', ticket);
+                        
+                        userTickets.push({
+                            ticketId: ticket.ticketId,
+                            lotteryId: ticket.lotteryId,
+                            owner: ticket.owner,
+                            numbers: ticket.chosenNumbers.filter(n => n > 0), // Filtrar ceros
+                            matches: ticket.matchedNumbers,
+                            isWinner: ticket.isWinner,
+                            purchaseDate: new Date(parseInt(ticket.purchaseTime) * 1000)
+                        });
+                    } catch (error) {
+                        console.error('Error obteniendo ticket', ticketId, ':', error);
+                    }
+                }
+
+                console.log('Tickets procesados:', userTickets);
+
+                                 if (userTickets.length > 0) {
+                     displayTickets();
+                     
+                     // Calcular estadísticas por estado
+                     const ganadores = userTickets.filter(t => t.matches === 6).length;
+                     const perdidos = userTickets.filter(t => t.isWinner === false && t.matches < 6).length;
+                     const enJuego = userTickets.length - ganadores - perdidos;
+                     const totalMatches = userTickets.reduce((sum, t) => sum + parseInt(t.matches), 0);
+                     
+                     updateStats(userTickets.length, ganadores, enJuego, perdidos, totalMatches);
+                     showMessage(`✅ ${userTickets.length} boletos cargados exitosamente`, 'success');
+                } else {
+                    displayNoTickets();
+                    showMessage('No se encontraron boletos válidos', 'warning');
+                }
+
+            } catch (error) {
+                console.error('Error completo cargando boletos:', error);
+                showMessage('❌ Error cargando boletos: ' + error.message, 'error');
+                displayNoTickets();
+            }
+        }
+
+        function displayTickets() {
+            const container = document.getElementById('tickets-container');
+            
+            if (userTickets.length === 0) {
+                displayNoTickets();
+                return;
+            }
+
+                         let html = '';
+             userTickets.forEach((ticket, index) => {
+                 // Determinar el estado del boleto basado en la lógica del juego
+                 let statusClass, statusText;
+                 
+                 if (ticket.matches === 6) {
+                     // Si acertó los 6 números = GANADOR
+                     statusClass = 'status-ganador';
+                     statusText = '🏆 GANADOR';
+                 } else if (ticket.isWinner === false) {
+                     // Si el contrato marcó isWinner = false, significa que ya perdió
+                     // (se sorteó un número que no tenía)
+                     statusClass = 'status-perdido';
+                     statusText = '❌ PERDIDO';
+                 } else {
+                     // Estado inicial o aún en juego
+                     statusClass = 'status-en-juego';
+                     statusText = '🎮 EN JUEGO';
+                 }
+                
+                html += `
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <div class="ticket-id">🎫 Boleto #${ticket.ticketId}</div>
+                            <div class="ticket-status ${statusClass}">${statusText}</div>
+                        </div>
+                        
+                        <div class="numbers-display">
+                            ${ticket.numbers.map(num => `<div class="number-ball">${num}</div>`).join('')}
+                        </div>
+                        
+                        <div class="ticket-info">
+                            <div class="info-item">
+                                <div class="info-label">Sorteo</div>
+                                <div class="info-value">#${ticket.lotteryId}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Aciertos</div>
+                                <div class="info-value">${ticket.matches}/6</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Fecha de Compra</div>
+                                <div class="info-value">${ticket.purchaseDate.toLocaleDateString()}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Hora</div>
+                                <div class="info-value">${ticket.purchaseDate.toLocaleTimeString()}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function displayNoTickets() {
+            const container = document.getElementById('tickets-container');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.7);">
+                    <h3>🎫 No tienes boletos</h3>
+                    <p>Compra boletos en el sorteo para verlos aquí</p>
+                    <a href="/demo" style="color: #4CAF50; text-decoration: none; font-size: 1.1em; margin-top: 15px; display: inline-block;">
+                        🎮 Ir a comprar boletos
+                    </a>
+                </div>
+            `;
+        }
+
+                 function updateStats(total, ganadores, enJuego, perdidos, matches) {
+             document.getElementById('total-tickets').textContent = total;
+             document.getElementById('ganador-tickets').textContent = ganadores;
+             document.getElementById('en-juego-tickets').textContent = enJuego;
+             document.getElementById('perdido-tickets').textContent = perdidos;
+             document.getElementById('total-matches').textContent = matches;
+         }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('status-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `status-message status-${type}`;
+            messageDiv.textContent = message;
+            container.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        // Event listeners para cambios de MetaMask
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    location.reload();
+                } else {
+                    onAccountConnected(accounts[0]);
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>

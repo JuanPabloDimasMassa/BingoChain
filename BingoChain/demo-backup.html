@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Comprar Boleto NFT - BingoChain</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            color: white; 
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .back-btn { 
+            position: fixed; top: 20px; left: 20px; 
+            background: rgba(255,255,255,0.2); color: white; 
+            padding: 10px 20px; border-radius: 25px; text-decoration: none; 
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        .card { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(15px); 
+            padding: 25px; 
+            border-radius: 20px; 
+            margin-bottom: 25px; 
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .status-dot { 
+            display: inline-block; 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            margin-right: 8px; 
+        }
+        .status-connected { background: #4CAF50; }
+        .status-disconnected { background: #f44336; }
+        .status-warning { background: #FF9800; }
+        .btn { 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            color: white; 
+            border: none; 
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 1em; 
+            margin: 8px; 
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn:disabled { background: #666; cursor: not-allowed; transform: none; opacity: 0.6; }
+        .btn-warning { background: linear-gradient(45deg, #FF9800, #F57C00); }
+        .btn-danger { background: linear-gradient(45deg, #f44336, #d32f2f); }
+        .numbers-grid { 
+            display: grid; 
+            grid-template-columns: repeat(10, 1fr); 
+            gap: 8px; 
+            margin: 20px 0; 
+        }
+        .number-btn { 
+            aspect-ratio: 1; 
+            border: 2px solid rgba(255,255,255,0.3); 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 45px;
+        }
+        .number-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+        .number-btn.selected { 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            border-color: #4CAF50; 
+            transform: scale(1.1); 
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .info-item { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; }
+        .log-container { 
+            background: rgba(0,0,0,0.3); 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.9em; 
+            max-height: 150px; 
+            overflow-y: auto; 
+        }
+        .status-message { 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin: 15px 0; 
+            text-align: center; 
+            font-weight: bold;
+            border-left: 4px solid;
+        }
+        .status-success { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; }
+        .status-error { background: rgba(244, 67, 54, 0.2); border-color: #f44336; }
+        .status-warning { background: rgba(255, 152, 0, 0.2); border-color: #FF9800; }
+        .status-info { background: rgba(33, 150, 243, 0.2); border-color: #2196F3; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← Volver al Inicio</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Comprar Boleto NFT</h1>
+            <p>Selecciona 6 números únicos del 1 al 100</p>
+        </div>
+
+        <!-- Estado del Sistema -->
+        <div class="card">
+            <h3>🔧 Estado del Sistema</h3>
+            <div style="margin: 15px 0;">
+                <div id="status-web3">
+                    <span class="status-dot status-disconnected"></span>
+                    <span>Web3: Cargando...</span>
+                </div>
+                <div id="status-metamask">
+                    <span class="status-dot status-disconnected"></span>
+                    <span>MetaMask: Verificando...</span>
+                </div>
+                <div id="status-network">
+                    <span class="status-dot status-disconnected"></span>
+                    <span>Red: No conectada</span>
+                </div>
+                <div id="status-account">
+                    <span class="status-dot status-disconnected"></span>
+                    <span>Cuenta: No conectada</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Juego -->
+        <div class="card">
+            <h3>🎲 Sorteo Semanal #1</h3>
+            <div class="info-grid">
+                <div class="info-item"><strong>🏆 Premio:</strong> 100 ETH </div>
+                <div class="info-item"><strong>💰 Precio:</strong> 0.01 ETH</div>
+                <div class="info-item"><strong>📅 Cierre:</strong> Lunes 12:00 hs</div>
+                <div class="info-item"><strong>🎯 Sorteos:</strong> Diarios 12:30 hs</div>
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="card">
+            <h3>🔗 Controles</h3>
+            <div id="wallet-info">
+                <p><strong>Cuenta:</strong> <span id="account-display">No conectada</span></p>
+                <p><strong>Balance:</strong> <span id="balance-display">0 ETH</span></p>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="connectWallet()">🦊 Conectar MetaMask</button>
+                <button class="btn btn-warning" onclick="switchToGanache()">🔧 Red Ganache</button>
+            </div>
+        </div>
+
+        <!-- Selección de Números -->
+        <div class="card">
+            <h3>🎯 Seleccionar 6 Números (1-100)</h3>
+            <div style="text-align: center; margin: 15px 0;">
+                <span id="selected-count" style="font-size: 1.2em; font-weight: bold;">
+                    Seleccionados: 0/6
+                </span>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 15px;">
+                <button class="btn btn-warning" onclick="selectRandomNumbers()">🎲 Números Aleatorios</button>
+                <button class="btn btn-danger" onclick="clearSelection()">🗑️ Limpiar Selección</button>
+            </div>
+            
+            <div class="numbers-grid" id="numbers-grid"></div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" id="buy-btn" onclick="buyTicket()" disabled style="font-size: 1.2em; padding: 20px 40px;">
+                    🎫 Comprar Boleto NFT - 0.01 ETH
+                </button>
+            </div>
+        </div>
+
+        <!-- Log de Actividad -->
+        <div class="card">
+            <h3>📋 Log de Actividad</h3>
+            <div class="log-container" id="log-container">
+                <div>Sistema iniciando...</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <button class="btn btn-danger" onclick="clearLogs()" style="padding: 8px 15px; font-size: 0.9em;">
+                    🗑️ Limpiar Log
+                </button>
+            </div>
+        </div>
+
+        <!-- Mensajes de Estado -->
+        <div id="status-messages"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+    <script>
+        // Configuración
+        const CONFIG = {
+            CONTRACT_ADDRESS: '0x345cA3e014Aaf5dcA488057592ee47305D9B3e10',
+            GANACHE_CHAIN_ID: '0x539',
+            GANACHE_RPC: 'http://127.0.0.1:8545',
+            TICKET_PRICE: '0.01'
+        };
+
+        // ABI completo de buyTicket extraído del contrato real
+        const CONTRACT_ABI = [
+            {
+                "inputs": [
+                    {"internalType": "uint256", "name": "_lotteryId", "type": "uint256"},
+                    {"internalType": "uint8[6]", "name": "_chosenNumbers", "type": "uint8[6]"}
+                ],
+                "name": "buyTicket",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function",
+                "payable": true
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "name": "lotteries",
+                "outputs": [
+                    {"internalType": "uint256", "name": "lotteryId", "type": "uint256"},
+                    {"internalType": "string", "name": "lotteryName", "type": "string"},
+                    {"internalType": "uint256", "name": "ticketPrice", "type": "uint256"},
+                    {"internalType": "uint256", "name": "prizePool", "type": "uint256"},
+                    {"internalType": "uint256", "name": "totalTickets", "type": "uint256"},
+                    {"internalType": "uint8", "name": "state", "type": "uint8"},
+                    {"internalType": "uint256", "name": "salesStartTime", "type": "uint256"},
+                    {"internalType": "uint256", "name": "salesEndTime", "type": "uint256"},
+                    {"internalType": "uint256[]", "name": "drawnNumbers", "type": "uint256[]"},
+                    {"internalType": "uint256", "name": "currentDrawDay", "type": "uint256"},
+                    {"internalType": "uint256", "name": "nextDrawTime", "type": "uint256"},
+                    {"internalType": "address[]", "name": "winners", "type": "address[]"},
+                    {"internalType": "bool", "name": "prizesDistributed", "type": "bool"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "paused",
+                "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // Variables globales
+        let web3;
+        let contract;
+        let userAccount;
+        let selectedNumbers = new Set();
+
+        // Funciones de utilidad
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '<div>Log limpiado...</div>';
+        }
+
+        function updateStatus(elementId, text, status) {
+            const element = document.getElementById(elementId);
+            const dot = element.querySelector('.status-dot');
+            const textSpan = element.querySelector('span:last-child');
+            
+            dot.className = `status-dot status-${status}`;
+            textSpan.textContent = text;
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('status-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `status-message status-${type}`;
+            messageDiv.textContent = message;
+            container.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        // Inicialización mejorada con verificación de Web3
+        function initializeApp() {
+            log('🚀 Iniciando aplicación...');
+            
+            // Verificar Web3
+            if (typeof Web3 !== 'undefined') {
+                log('✅ Web3 cargado correctamente');
+                updateStatus('status-web3', 'Web3: Cargado', 'connected');
+                
+                // Detectar MetaMask
+                detectMetaMask();
+            } else {
+                log('❌ Error: Web3 no está disponible');
+                updateStatus('status-web3', 'Web3: Error', 'disconnected');
+                showMessage('❌ Error cargando Web3. Recarga la página.', 'error');
+            }
+        }
+
+        function detectMetaMask() {
+            log('🔍 Detectando MetaMask...');
+            
+            if (typeof window.ethereum !== 'undefined') {
+                log('✅ MetaMask detectado');
+                updateStatus('status-metamask', 'MetaMask: Detectado', 'connected');
+                
+                // Inicializar Web3
+                try {
+                    web3 = new Web3(window.ethereum);
+                    contract = new web3.eth.Contract(CONTRACT_ABI, CONFIG.CONTRACT_ADDRESS);
+                    log('✅ Contratos inicializados');
+                    
+                    // Verificar si ya está conectado
+                    checkExistingConnection();
+                } catch (error) {
+                    log('❌ Error inicializando Web3: ' + error.message);
+                    showMessage('❌ Error inicializando sistema', 'error');
+                }
+            } else {
+                log('❌ MetaMask no detectado');
+                updateStatus('status-metamask', 'MetaMask: No instalado', 'disconnected');
+                showMessage('❌ MetaMask no detectado. Instala MetaMask.', 'error');
+                
+                // Fallback a RPC directo para testing
+                try {
+                    web3 = new Web3(CONFIG.GANACHE_RPC);
+                    contract = new web3.eth.Contract(CONTRACT_ABI, CONFIG.CONTRACT_ADDRESS);
+                    log('⚠️ Usando RPC directo para testing');
+                } catch (error) {
+                    log('❌ Error en fallback RPC: ' + error.message);
+                }
+            }
+        }
+
+        async function checkExistingConnection() {
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    onAccountConnected(accounts[0]);
+                }
+            } catch (error) {
+                log('Error verificando conexión existente: ' + error.message);
+            }
+        }
+
+        async function connectWallet() {
+            try {
+                log('🔗 Conectando MetaMask...');
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                onAccountConnected(accounts[0]);
+            } catch (error) {
+                log('❌ Error conectando: ' + error.message);
+                showMessage('❌ Error conectando MetaMask', 'error');
+            }
+        }
+
+        async function onAccountConnected(account) {
+            userAccount = account;
+            log(`👤 Cuenta conectada: ${account}`);
+            
+            document.getElementById('account-display').textContent = 
+                `${account.substring(0, 6)}...${account.substring(38)}`;
+            updateStatus('status-account', 'Cuenta: Conectada', 'connected');
+            
+            await verifyNetwork();
+            await updateBalance();
+            updateBuyButton();
+        }
+
+        async function verifyNetwork() {
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                log(`🌐 Red detectada: ${chainId}`);
+                
+                if (chainId === CONFIG.GANACHE_CHAIN_ID) {
+                    log('✅ Conectado a Ganache');
+                    updateStatus('status-network', 'Red: Ganache', 'connected');
+                } else {
+                    log('⚠️ Red incorrecta');
+                    updateStatus('status-network', `Red: Incorrecta`, 'warning');
+                    showMessage('⚠️ Cambia a la red Ganache', 'warning');
+                }
+            } catch (error) {
+                log('❌ Error verificando red: ' + error.message);
+            }
+        }
+
+        async function switchToGanache() {
+            try {
+                log('🔧 Cambiando a Ganache...');
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: CONFIG.GANACHE_CHAIN_ID }]
+                });
+                log('✅ Cambiado a Ganache');
+                await verifyNetwork();
+            } catch (error) {
+                if (error.code === 4902) {
+                    await addGanacheNetwork();
+                } else {
+                    log('❌ Error cambiando red: ' + error.message);
+                }
+            }
+        }
+
+        async function addGanacheNetwork() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [{
+                        chainId: CONFIG.GANACHE_CHAIN_ID,
+                        chainName: 'Ganache Local',
+                        rpcUrls: [CONFIG.GANACHE_RPC],
+                        nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }
+                    }]
+                });
+                log('✅ Red Ganache agregada');
+            } catch (error) {
+                log('❌ Error agregando Ganache: ' + error.message);
+            }
+        }
+
+        async function updateBalance() {
+            if (!userAccount || !web3) return;
+            
+            try {
+                const balance = await web3.eth.getBalance(userAccount);
+                const balanceEth = web3.utils.fromWei(balance, 'ether');
+                document.getElementById('balance-display').textContent = 
+                    `${parseFloat(balanceEth).toFixed(4)} ETH`;
+                log(`💰 Balance: ${parseFloat(balanceEth).toFixed(4)} ETH`);
+            } catch (error) {
+                log('❌ Error obteniendo balance: ' + error.message);
+            }
+        }
+
+        function generateNumberGrid() {
+            const grid = document.getElementById('numbers-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 1; i <= 100; i++) {
+                const button = document.createElement('button');
+                button.className = 'number-btn';
+                button.textContent = i;
+                button.onclick = () => toggleNumber(i);
+                grid.appendChild(button);
+            }
+        }
+
+        function toggleNumber(number) {
+            const button = event.target;
+            
+            if (selectedNumbers.has(number)) {
+                selectedNumbers.delete(number);
+                button.classList.remove('selected');
+            } else {
+                if (selectedNumbers.size >= 6) {
+                    showMessage('⚠️ Solo puedes seleccionar 6 números', 'warning');
+                    return;
+                }
+                selectedNumbers.add(number);
+                button.classList.add('selected');
+            }
+            
+            updateSelectedCount();
+            updateBuyButton();
+        }
+
+        function selectRandomNumbers() {
+            clearSelection();
+            const numbers = [];
+            
+            while (numbers.length < 6) {
+                const num = Math.floor(Math.random() * 100) + 1;
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+            
+            numbers.forEach(num => {
+                selectedNumbers.add(num);
+                const buttons = document.querySelectorAll('.number-btn');
+                buttons[num - 1].classList.add('selected');
+            });
+            
+            updateSelectedCount();
+            updateBuyButton();
+            log(`🎲 Números aleatorios: ${numbers.join(', ')}`);
+            showMessage('🎲 Números aleatorios seleccionados', 'info');
+        }
+
+        function clearSelection() {
+            selectedNumbers.clear();
+            document.querySelectorAll('.number-btn.selected').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            updateSelectedCount();
+            updateBuyButton();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selected-count').textContent = `Seleccionados: ${selectedNumbers.size}/6`;
+        }
+
+        function updateBuyButton() {
+            const buyBtn = document.getElementById('buy-btn');
+            buyBtn.disabled = !userAccount || selectedNumbers.size !== 6;
+        }
+
+        async function buyTicket() {
+            if (!userAccount || !contract) {
+                showMessage('❌ Conecta tu billetera primero', 'error');
+                return;
+            }
+            
+            if (selectedNumbers.size !== 6) {
+                showMessage('⚠️ Selecciona exactamente 6 números', 'warning');
+                return;
+            }
+
+            try {
+                log('🎫 Comprando boleto...');
+                showMessage('🔄 Procesando compra...', 'info');
+                
+                // Verificar red
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== CONFIG.GANACHE_CHAIN_ID) {
+                    showMessage('⚠️ Cambia a la red Ganache primero', 'warning');
+                    return;
+                }
+                
+                // Verificar balance
+                const balance = await web3.eth.getBalance(userAccount);
+                const balanceEth = parseFloat(web3.utils.fromWei(balance, 'ether'));
+                if (balanceEth < 0.02) {
+                    showMessage('❌ Balance insuficiente. Necesitas al menos 0.02 ETH', 'error');
+                    return;
+                }
+                
+                // Preparar números
+                const numbersArray = [...selectedNumbers].sort((a, b) => a - b);
+                const uint8Numbers = numbersArray.map(num => Math.min(255, Math.max(0, num)));
+                log(`🔢 Números: [${uint8Numbers.join(', ')}]`);
+                
+                // Enviar transacción con configuración exacta del debug
+                const ticketPrice = web3.utils.toWei(CONFIG.TICKET_PRICE, 'ether');
+                const transaction = await contract.methods.buyTicket(1, uint8Numbers).send({
+                    from: userAccount,
+                    value: ticketPrice,
+                    gas: 1000000,
+                    gasPrice: web3.utils.toWei('20', 'gwei')
+                });
+
+                log(`✅ Transacción exitosa: ${transaction.transactionHash}`);
+                showMessage('🎉 ¡Boleto NFT comprado exitosamente!', 'success');
+                
+                clearSelection();
+                setTimeout(updateBalance, 2000);
+                
+            } catch (error) {
+                log(`❌ Error en compra: ${error.message}`);
+                
+                let errorMessage = 'Error desconocido';
+                if (error.message.includes('User denied')) {
+                    errorMessage = 'Transacción cancelada';
+                } else if (error.message.includes('insufficient funds')) {
+                    errorMessage = 'Fondos insuficientes';
+                } else if (error.message.includes('revert')) {
+                    errorMessage = 'Transacción rechazada por el contrato';
+                } else {
+                    errorMessage = error.message;
+                }
+                
+                showMessage(`❌ Error: ${errorMessage}`, 'error');
+            }
+        }
+
+        // Event listeners para cambios de MetaMask
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    location.reload();
+                } else {
+                    onAccountConnected(accounts[0]);
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
+        }
+
+        // Inicialización con delay para asegurar que Web3 se cargue
+        window.addEventListener('load', () => {
+            generateNumberGrid();
+            
+            // Dar tiempo a Web3 para cargar
+            setTimeout(() => {
+                initializeApp();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

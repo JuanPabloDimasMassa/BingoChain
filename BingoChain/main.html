@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 BingoChain - Lotería Descentralizada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh; 
+            color: white; 
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Fondo animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.05)"/><stop offset="100%" style="stop-color:rgba(255,255,255,0)"/></radialGradient></defs><circle cx="200" cy="200" r="100" fill="url(%23a)"><animate attributeName="r" values="100;150;100" dur="4s" repeatCount="indefinite"/></circle><circle cx="800" cy="300" r="80" fill="url(%23a)"><animate attributeName="r" values="80;120;80" dur="6s" repeatCount="indefinite"/></circle><circle cx="500" cy="700" r="120" fill="url(%23a)"><animate attributeName="r" values="120;170;120" dur="5s" repeatCount="indefinite"/></circle></svg>') center/cover;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .header h1 { 
+            font-size: clamp(2.5em, 5vw, 4em); 
+            margin-bottom: 20px; 
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .header p { 
+            font-size: 1.2em; 
+            opacity: 0.9; 
+            font-weight: 300;
+        }
+        
+        .lotteries-section { 
+            margin-bottom: 40px; 
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .section-title { 
+            font-size: 2em; 
+            margin-bottom: 20px; 
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .lotteries-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 30px;
+        }
+        
+        .lottery-card { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(20px); 
+            padding: 25px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out both;
+        }
+        
+        .lottery-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .lottery-card.active {
+            border: 2px solid #4CAF50;
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.3);
+        }
+        
+        .lottery-card.completed {
+            border: 2px solid #FF9800;
+            opacity: 0.8;
+        }
+        
+        .lottery-card.upcoming {
+            border: 2px solid #2196F3;
+        }
+        
+        .lottery-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px;
+        }
+        
+        .lottery-id { 
+            font-size: 1.2em; 
+            font-weight: 600; 
+            color: #FFD700;
+        }
+        
+        .lottery-status { 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-size: 0.9em; 
+            font-weight: 500;
+        }
+        
+        .status-active { 
+            background: rgba(76, 175, 80, 0.2); 
+            color: #4CAF50; 
+            border: 1px solid #4CAF50;
+        }
+        
+        .status-completed { 
+            background: rgba(255, 152, 0, 0.2); 
+            color: #FF9800; 
+            border: 1px solid #FF9800;
+        }
+        
+        .status-upcoming { 
+            background: rgba(33, 150, 243, 0.2); 
+            color: #2196F3; 
+            border: 1px solid #2196F3;
+        }
+        
+        .lottery-info p { 
+            margin-bottom: 8px; 
+            font-size: 0.95em;
+        }
+        
+        .lottery-actions { 
+            margin-top: 20px; 
+            text-align: center;
+        }
+        
+        .btn { 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 25px; 
+            font-weight: 600; 
+            text-decoration: none; 
+            display: inline-block; 
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(45deg, #4CAF50, #45a049); 
+            color: white; 
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-secondary { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn-secondary:hover { 
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed;
+        }
+        
+        .loading { 
+            text-align: center; 
+            padding: 40px; 
+            font-size: 1.2em;
+        }
+        
+        .error { 
+            text-align: center; 
+            padding: 40px; 
+            color: #ff6b6b; 
+            font-size: 1.1em;
+        }
+        
+        .status { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(20px); 
+            padding: 25px; 
+            border-radius: 20px; 
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .status h3 { 
+            margin-bottom: 20px; 
+            text-align: center;
+            font-size: 1.5em;
+        }
+        
+        .status-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .status-indicator { 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            background: #4CAF50; 
+            animation: pulse 2s infinite;
+        }
+        
+        .footer { 
+            text-align: center; 
+            margin-top: 50px; 
+            padding: 30px; 
+            background: rgba(255,255,255,0.05); 
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .footer p { 
+            margin-bottom: 10px; 
+            opacity: 0.8;
+        }
+        
+        .footer code { 
+            background: rgba(255,255,255,0.1); 
+            padding: 2px 8px; 
+            border-radius: 5px; 
+            font-family: 'Courier New', monospace;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .lotteries-grid { 
+                grid-template-columns: 1fr; 
+            }
+            
+            .lottery-header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 BingoChain</h1>
+            <p>Lotería descentralizada con NFTs - Participa en sorteos semanales</p>
+        </div>
+        
+        <div class="lotteries-section">
+            <h2 class="section-title">🎲 Sorteos Disponibles</h2>
+            <div id="lotteries-list" class="lotteries-grid">
+                <div class="loading">🔄 Cargando sorteos...</div>
+            </div>
+        </div>
+        
+        <div class="status">
+            <h3>📊 Estado del Sistema</h3>
+            <div class="status-item">
+                <span>🗄️ Base de Datos PostgreSQL</span>
+                <div class="status-indicator"></div>
+            </div>
+            <div class="status-item">
+                <span>⛓️ Blockchain Ganache</span>
+                <div class="status-indicator"></div>
+            </div>
+            <div class="status-item">
+                <span>🔧 Backend API</span>
+                <div class="status-indicator"></div>
+            </div>
+            <div class="status-item">
+                <span>🎨 Frontend Web</span>
+                <div class="status-indicator"></div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🎯 <strong>BingoChain</strong> - Lotería descentralizada con NFTs</p>
+            <p>📍 Contrato: <code>0x345cA3e014Aaf5dcA488057592ee47305D9B3e10</code></p>
+            <p>🌐 Red: Localhost (Chain ID: 1337)</p>
+            <p>⚠️ <strong>Nota:</strong> Si tenías boletos anteriores, es posible que no aparezcan porque el contrato se actualizó. ¡Compra nuevos boletos para participar!</p>
+        </div>
+    </div>
+
+    <script>
+        // Función para cargar sorteos desde la API
+        async function loadLotteries() {
+            const lotteriesList = document.getElementById('lotteries-list');
+            
+            try {
+                // Mostrar loading
+                lotteriesList.innerHTML = '<div class="loading">🔄 Cargando sorteos...</div>';
+                
+                // Hacer petición a la API
+                const response = await fetch('http://localhost:3501/api/v1/lotteries');
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const lotteries = await response.json();
+                
+                if (!lotteries || lotteries.length === 0) {
+                    lotteriesList.innerHTML = '<div class="error">❌ No hay sorteos disponibles</div>';
+                    return;
+                }
+                
+                // Generar HTML para cada sorteo
+                const lotteriesHTML = lotteries.map(lottery => {
+                    const status = getLotteryStatus(lottery);
+                    const statusClass = getStatusClass(status);
+                    const statusText = getStatusText(status);
+                    
+                    return `
+                        <div class="lottery-card ${statusClass}">
+                            <div class="lottery-header">
+                                <div class="lottery-id">Sorteo #${lottery.id}</div>
+                                <div class="lottery-status status-${statusClass}">${statusText}</div>
+                            </div>
+                            
+                            <div class="lottery-info">
+                                <p><strong>📅 Fecha de Inicio:</strong> ${formatDate(lottery.salesStartTime)}</p>
+                                <p><strong>📅 Fecha de Fin:</strong> ${formatDate(lottery.salesEndTime)}</p>
+                                <p><strong>🎫 Precio del Boleto:</strong> ${lottery.ticketPrice} ETH</p>
+                                <p><strong>🏆 Premio Total:</strong> ${lottery.prizePool || '0'} ETH</p>
+                                <p><strong>🎲 Números Ganadores:</strong> ${lottery.drawnNumbers ? lottery.drawnNumbers.join(', ') : 'Pendiente'}</p>
+                            </div>
+                            
+                            <div class="lottery-actions">
+                                ${status === 'active' ? 
+                                    `<button class="btn btn-primary" onclick="playLottery(${lottery.id}, '${lottery.lotteryName}', ${lottery.ticketPrice})">🎮 Jugar Ahora</button>` : 
+                                    `<button class="btn btn-secondary" disabled>Ver Detalles</button>`
+                                }
+                                ${status === 'completed' ? 
+                                    `<button class="btn btn-secondary" onclick="viewResults(${lottery.id})">📊 Ver Resultados</button>` : 
+                                    ''
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                lotteriesList.innerHTML = lotteriesHTML;
+                
+            } catch (error) {
+                console.error('Error cargando sorteos:', error);
+                lotteriesList.innerHTML = `
+                    <div class="error">
+                        ❌ Error cargando sorteos: ${error.message}
+                        <br><br>
+                        <button class="btn btn-primary" onclick="loadLotteries()">🔄 Reintentar</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Función para determinar el estado del sorteo
+        function getLotteryStatus(lottery) {
+            const now = new Date();
+            const startDate = new Date(lottery.salesStartTime);
+            const endDate = new Date(lottery.salesEndTime);
+            
+            if (lottery.status === 'COMPLETED') {
+                return 'completed';
+            } else if (lottery.status === 'TICKET_SALES' && now >= startDate && now <= endDate) {
+                return 'active';
+            } else if (now < startDate) {
+                return 'upcoming';
+            } else {
+                return 'completed';
+            }
+        }
+        
+        // Función para obtener la clase CSS del estado
+        function getStatusClass(status) {
+            switch (status) {
+                case 'active': return 'active';
+                case 'completed': return 'completed';
+                case 'upcoming': return 'upcoming';
+                default: return 'completed';
+            }
+        }
+        
+        // Función para obtener el texto del estado
+        function getStatusText(status) {
+            switch (status) {
+                case 'active': return 'Activo';
+                case 'completed': return 'Finalizado';
+                case 'upcoming': return 'Próximo';
+                default: return 'Desconocido';
+            }
+        }
+        
+        // Función para formatear fechas
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Función para ver resultados (placeholder)
+        function viewResults(lotteryId) {
+            alert(`Ver resultados del sorteo #${lotteryId}\n\nEsta funcionalidad estará disponible próximamente.`);
+        }
+        
+        // Función para jugar una lotería específica
+        function playLottery(lotteryId, lotteryName, ticketPrice) {
+            // Guardar información del sorteo en localStorage para que demo.html pueda acceder
+            const lotteryInfo = {
+                id: lotteryId,
+                name: lotteryName,
+                ticketPrice: ticketPrice,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('selectedLottery', JSON.stringify(lotteryInfo));
+            
+            // Redirigir a la página de compra de boletos
+            window.location.href = 'demo.html';
+        }
+        
+        // Cargar sorteos cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLotteries();
+            
+            // Recargar sorteos cada 30 segundos
+            setInterval(loadLotteries, 30000);
+        });
+    </script>
+</body>
+</html>
