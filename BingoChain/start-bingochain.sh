@@ -157,18 +157,18 @@ if [ ! -d "blockchain/node_modules" ]; then
     cd ..
 fi
 
-# Verificar si Ganache ya está corriendo
+# Verificar si Ganache CLI ya está corriendo
 if check_port 8545; then
-    print_warning "Ganache ya está corriendo en el puerto 8545"
+    print_success "Ganache CLI ya está corriendo en el puerto 8545"
 else
-    print_status "Iniciando Ganache..."
+    print_status "Iniciando Ganache CLI..."
     cd blockchain
     npx ganache-cli -p 8545 -m "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" &
     GANACHE_PID=$!
     cd ..
     
     # Esperar a que Ganache esté listo
-    wait_for_service "http://localhost:8545" "Ganache" || exit 1
+    wait_for_service "http://localhost:8545" "Ganache CLI" || exit 1
 fi
 
 # Compilar y desplegar contratos
@@ -180,14 +180,35 @@ print_status "Desplegando contratos..."
 npx truffle migrate --network development
 
 # Obtener la dirección del contrato desplegado
-CONTRACT_ADDRESS=$(cat deployments/development.json | grep -o '"contractAddress":"[^"]*"' | cut -d'"' -f4)
-print_success "Contrato desplegado en: $CONTRACT_ADDRESS"
+DEPLOYMENT_FILE="deployments/development.json"
+
+if [ -f "$DEPLOYMENT_FILE" ]; then
+    CONTRACT_ADDRESS=$(cat "$DEPLOYMENT_FILE" | grep -o '"contractAddress"[[:space:]]*:[[:space:]]*"[^"]*"' | cut -d'"' -f4)
+    if [ -z "$CONTRACT_ADDRESS" ]; then
+        # Método alternativo usando jq si está disponible
+        if command -v jq &> /dev/null; then
+            CONTRACT_ADDRESS=$(cat "$DEPLOYMENT_FILE" | jq -r '.contractAddress')
+        else
+            # Método manual más robusto
+            CONTRACT_ADDRESS=$(cat "$DEPLOYMENT_FILE" | sed -n 's/.*"contractAddress"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+        fi
+    fi
+    print_success "Contrato desplegado en: $CONTRACT_ADDRESS"
+else
+    print_error "No se encontró el archivo de deployment: $DEPLOYMENT_FILE"
+    print_warning "Usando dirección por defecto..."
+    CONTRACT_ADDRESS="0x345cA3e014Aaf5dcA488057592ee47305D9B3e10"
+fi
 
 cd ..
 
 # Actualizar configuración del backend con la dirección del contrato
 print_status "Actualizando configuración del backend..."
-sed -i "s/address: \"\"/address: \"$CONTRACT_ADDRESS\"/" backend/src/main/resources/application.yml
+# Actualizar la dirección del contrato
+sed -i "s/address: \".*\"/address: \"$CONTRACT_ADDRESS\"/" backend/src/main/resources/application.yml
+# Asegurar configuración para Ganache CLI
+sed -i "s|network-url: .*|network-url: http://localhost:8545|" backend/src/main/resources/application.yml
+sed -i "s/chain-id: .*/chain-id: 1337/" backend/src/main/resources/application.yml
 
 # 3. Levantar Backend Java
 print_status "Iniciando backend Java Spring Boot..."
@@ -219,19 +240,20 @@ echo ""
 print_success "Servicios disponibles:"
 echo "  🗄️  PostgreSQL:     localhost:5434"
 echo "  🔴 Redis:          localhost:6379"
-echo "  ⛓️  Ganache:        localhost:8545"
+echo "  ⛓️  Ganache CLI:    localhost:8545"
 echo "  🔧 Backend API:    http://localhost:3500/api/v1"
 echo "  📁 Frontend Web:   http://localhost:8080"
 echo ""
 print_success "URLs principales:"
 echo "  🏠 Página de Inicio:    http://localhost:8080/"
+echo "  📊 Panel Principal:     http://localhost:8080/main.html"
 echo "  🎮 Demo Principal:      http://localhost:8080/demo.html"
 echo "  🎫 Mis Boletos:         http://localhost:8080/mis-boletos.html"
-echo "  ⚙️  Configurar Sepolia:  http://localhost:8080/configurar-sepolia.html"
 echo ""
 print_success "Información del contrato:"
 echo "  📍 Dirección: $CONTRACT_ADDRESS"
-echo "  🌐 Red: Localhost (Chain ID: 1337)"
+echo "  🌐 Red: Ganache CLI (Chain ID: 1337)"
+echo "  🔗 URL: http://localhost:8545"
 echo ""
 print_warning "Para detener todos los servicios, presiona Ctrl+C"
 echo ""

@@ -86,6 +86,19 @@ def get_player_tickets(wallet_address):
         logger.error(f"Error fetching player tickets: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
+@app.route('/api/tickets/player/<wallet_address>/lottery/<int:lottery_id>', methods=['GET'])
+def get_player_tickets_for_lottery(wallet_address, lottery_id):
+    """Get player's tickets for a specific lottery"""
+    try:
+        response = requests.get(f"{Config.BACKEND_API_URL}/tickets/player/{wallet_address}/lottery/{lottery_id}")
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({"error": "Failed to fetch tickets for lottery"}), 500
+    except Exception as e:
+        logger.error(f"Error fetching player tickets for lottery: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
 @app.route('/api/tickets/purchase', methods=['POST'])
 def purchase_ticket_api():
     """Purchase a ticket"""

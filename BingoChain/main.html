@@ -284,6 +284,186 @@
             100% { opacity: 1; }
         }
         
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            backdrop-filter: blur(20px);
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            color: white;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #FFD700;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: white;
+        }
+        
+        .tickets-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .ticket-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .ticket-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+        
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .ticket-id {
+            font-weight: 600;
+            color: #4CAF50;
+        }
+        
+        .ticket-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        
+        .ticket-winner {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+        }
+        
+        .ticket-normal {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+            border: 1px solid #2196F3;
+        }
+        
+        .ticket-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .number-ball {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .ticket-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+        
+        .info-value {
+            font-weight: 600;
+        }
+        
+        .no-tickets {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+        }
+        
+        .wallet-section {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .wallet-status {
+            margin-bottom: 15px;
+        }
+        
+        .wallet-address {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
         @media (max-width: 768px) {
             .lotteries-grid { 
                 grid-template-columns: 1fr; 
@@ -294,6 +474,16 @@
                 align-items: flex-start; 
                 gap: 10px;
             }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 20px;
+            }
+            
+            .ticket-info {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -302,6 +492,17 @@
         <div class="header">
             <h1>🎯 BingoChain</h1>
             <p>Lotería descentralizada con NFTs - Participa en sorteos semanales</p>
+        </div>
+        
+        <!-- Wallet Connection Section -->
+        <div class="wallet-section">
+            <div class="wallet-status" id="walletStatus">
+                <span id="walletStatusText">🔗 Conecta tu wallet para ver tus boletos</span>
+            </div>
+            <div id="walletInfo" style="display: none;">
+                <div class="wallet-address" id="walletAddress"></div>
+            </div>
+            <button id="connectWalletBtn" class="btn btn-primary" onclick="connectWallet()">🔗 Conectar Wallet</button>
         </div>
         
         <div class="lotteries-section">
@@ -338,6 +539,19 @@
             <p>⚠️ <strong>Nota:</strong> Si tenías boletos anteriores, es posible que no aparezcan porque el contrato se actualizó. ¡Compra nuevos boletos para participar!</p>
         </div>
     </div>
+    
+    <!-- Modal para mostrar boletos -->
+    <div id="ticketsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">🎫 Mis Boletos</h2>
+                <span class="close" onclick="closeTicketsModal()">&times;</span>
+            </div>
+            <div id="modalContent">
+                <div class="loading" id="modalLoading">🔄 Cargando boletos...</div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Función para cargar sorteos desde la API
@@ -349,7 +563,7 @@
                 lotteriesList.innerHTML = '<div class="loading">🔄 Cargando sorteos...</div>';
                 
                 // Hacer petición a la API
-                const response = await fetch('http://localhost:3501/api/v1/lotteries');
+                const response = await fetch('http://localhost:3500/api/v1/lotteries');
                 
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -386,8 +600,9 @@
                             <div class="lottery-actions">
                                 ${status === 'active' ? 
                                     `<button class="btn btn-primary" onclick="playLottery(${lottery.id}, '${lottery.lotteryName}', ${lottery.ticketPrice})">🎮 Jugar Ahora</button>` : 
-                                    `<button class="btn btn-secondary" disabled>Ver Detalles</button>`
+                                    ''
                                 }
+                                <button class="btn btn-secondary" id="viewTicketsBtn_${lottery.id}" onclick="viewMyTickets(${lottery.id}, '${lottery.lotteryName}')">🎫 Ver Mis Boletos</button>
                                 ${status === 'completed' ? 
                                     `<button class="btn btn-secondary" onclick="viewResults(${lottery.id})">📊 Ver Resultados</button>` : 
                                     ''
@@ -481,12 +696,315 @@
             window.location.href = 'demo.html';
         }
         
+        // Variables globales
+        let currentWalletAddress = null;
+        let isWalletConnected = false;
+        
+        // Función para conectar wallet con MetaMask
+        async function connectWallet() {
+            try {
+                // Verificar si MetaMask está instalado
+                if (typeof window.ethereum === 'undefined') {
+                    alert('MetaMask no está instalado. Por favor, instala MetaMask para continuar.');
+                    window.open('https://metamask.io/download/', '_blank');
+                    return;
+                }
+                
+                // Solicitar conexión a MetaMask
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts.length === 0) {
+                    alert('No se encontraron cuentas en MetaMask');
+                    return;
+                }
+                
+                currentWalletAddress = accounts[0];
+                isWalletConnected = true;
+                
+                // Verificar que estamos en la red correcta (Ganache CLI - Chain ID 1337)
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const expectedChainId = '0x539'; // 1337 en hexadecimal
+                
+                if (chainId !== expectedChainId) {
+                    try {
+                        // Intentar cambiar a la red correcta
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: expectedChainId }],
+                        });
+                    } catch (switchError) {
+                        // Si la red no existe, agregarla
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: expectedChainId,
+                                    chainName: 'Ganache Local',
+                                    nativeCurrency: {
+                                        name: 'Ethereum',
+                                        symbol: 'ETH',
+                                        decimals: 18
+                                    },
+                                    rpcUrls: ['http://localhost:8545'],
+                                    blockExplorerUrls: null
+                                }]
+                            });
+                        } else {
+                            console.error('Error cambiando de red:', switchError);
+                        }
+                    }
+                }
+                
+                // Escuchar cambios de cuenta
+                window.ethereum.on('accountsChanged', function (accounts) {
+                    if (accounts.length === 0) {
+                        // Usuario desconectó MetaMask
+                        currentWalletAddress = null;
+                        isWalletConnected = false;
+                    } else {
+                        currentWalletAddress = accounts[0];
+                    }
+                    updateWalletUI();
+                    loadLotteries();
+                });
+                
+                // Escuchar cambios de red
+                window.ethereum.on('chainChanged', function (chainId) {
+                    // Recargar la página cuando cambie la red
+                    window.location.reload();
+                });
+                
+                // Actualizar UI
+                updateWalletUI();
+                
+                // Recargar sorteos para actualizar botones
+                await loadLotteries();
+                
+                console.log('Wallet conectado:', currentWalletAddress);
+                
+            } catch (error) {
+                console.error('Error conectando wallet:', error);
+                if (error.code === 4001) {
+                    alert('Conexión rechazada por el usuario');
+                } else {
+                    alert('Error al conectar wallet: ' + error.message);
+                }
+            }
+        }
+        
+        // Función para actualizar la UI del wallet
+        function updateWalletUI() {
+            const walletStatusText = document.getElementById('walletStatusText');
+            const walletInfo = document.getElementById('walletInfo');
+            const walletAddress = document.getElementById('walletAddress');
+            const connectBtn = document.getElementById('connectWalletBtn');
+            
+            if (isWalletConnected && currentWalletAddress) {
+                walletStatusText.textContent = '✅ Wallet Conectado';
+                walletAddress.textContent = currentWalletAddress;
+                walletInfo.style.display = 'block';
+                connectBtn.textContent = '🔄 Cambiar Wallet';
+            } else {
+                walletStatusText.textContent = '🔗 Conecta tu wallet para ver tus boletos';
+                walletInfo.style.display = 'none';
+                connectBtn.textContent = '🔗 Conectar Wallet';
+            }
+        }
+        
+        // Función para ver los boletos de un sorteo específico
+        async function viewMyTickets(lotteryId, lotteryName) {
+            if (!isWalletConnected || !currentWalletAddress) {
+                alert('Debes conectar tu wallet primero');
+                return;
+            }
+            
+            // Mostrar modal
+            const modal = document.getElementById('ticketsModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            const modalLoading = document.getElementById('modalLoading');
+            
+            modalTitle.textContent = `🎫 Mis Boletos - ${lotteryName}`;
+            modal.style.display = 'block';
+            modalLoading.style.display = 'block';
+            
+            try {
+                // Hacer petición para obtener boletos del usuario para este sorteo
+                const response = await fetch(`http://localhost:3000/api/tickets/player/${currentWalletAddress}/lottery/${lotteryId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                
+                const tickets = await response.json();
+                
+                // Mostrar boletos
+                displayTicketsInModal(tickets);
+                
+            } catch (error) {
+                console.error('Error cargando boletos:', error);
+                modalContent.innerHTML = `
+                    <div class="error">
+                        ❌ Error cargando boletos: ${error.message}
+                        <br><br>
+                        <button class="btn btn-primary" onclick="viewMyTickets(${lotteryId}, '${lotteryName}')">🔄 Reintentar</button>
+                    </div>
+                `;
+            } finally {
+                modalLoading.style.display = 'none';
+            }
+        }
+        
+        // Función para mostrar boletos en el modal
+        function displayTicketsInModal(tickets) {
+            const modalContent = document.getElementById('modalContent');
+            
+            if (!tickets || tickets.length === 0) {
+                modalContent.innerHTML = `
+                    <div class="no-tickets">
+                        <h3>😔 No tienes boletos para este sorteo</h3>
+                        <p>¡Compra boletos para participar en el próximo sorteo!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const ticketsHTML = tickets.map(ticket => {
+                const numbers = JSON.parse(ticket.chosenNumbers || '[]');
+                const isWinner = ticket.isWinner;
+                const purchaseDate = new Date(ticket.purchasedAt).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <div class="ticket-id">Boleto #${ticket.id}</div>
+                            <div class="ticket-status ${isWinner ? 'ticket-winner' : 'ticket-normal'}">
+                                ${isWinner ? '🏆 Ganador' : '🎫 Participante'}
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-numbers">
+                            ${numbers.map(num => `<div class="number-ball">${num}</div>`).join('')}
+                        </div>
+                        
+                        <div class="ticket-info">
+                            <div class="info-item">
+                                <div class="info-label">Fecha de Compra</div>
+                                <div class="info-value">${purchaseDate}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Precio Pagado</div>
+                                <div class="info-value">${ticket.ticketPricePaid} ETH</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Números Coincidentes</div>
+                                <div class="info-value">${ticket.matchedNumbers || 0}/6</div>
+                            </div>
+                            ${isWinner ? `
+                                <div class="info-item">
+                                    <div class="info-label">Premio Ganado</div>
+                                    <div class="info-value">${ticket.prizeAmount} ETH</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            modalContent.innerHTML = `
+                <div class="tickets-container">
+                    ${ticketsHTML}
+                </div>
+            `;
+        }
+        
+        // Función para cerrar el modal
+        function closeTicketsModal() {
+            document.getElementById('ticketsModal').style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer click fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('ticketsModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Función para actualizar el estado de los botones según los boletos del usuario
+        async function updateTicketButtons() {
+            if (!isWalletConnected || !currentWalletAddress) {
+                // Si no hay wallet conectado, deshabilitar todos los botones
+                const buttons = document.querySelectorAll('[id^="viewTicketsBtn_"]');
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.textContent = '🔗 Conecta Wallet';
+                });
+                return;
+            }
+            
+            // Si hay wallet conectado, verificar boletos para cada sorteo
+            const buttons = document.querySelectorAll('[id^="viewTicketsBtn_"]');
+            
+            for (const btn of buttons) {
+                const lotteryId = btn.id.split('_')[1];
+                
+                try {
+                    const response = await fetch(`http://localhost:3000/api/tickets/player/${currentWalletAddress}/lottery/${lotteryId}`);
+                    if (response.ok) {
+                        const tickets = await response.json();
+                        const hasTickets = tickets && tickets.length > 0;
+                        
+                        btn.disabled = false;
+                        btn.style.opacity = hasTickets ? '1' : '0.6';
+                        btn.textContent = hasTickets ? `🎫 Ver Boletos (${tickets.length})` : '🎫 Sin Boletos';
+                    }
+                } catch (error) {
+                    console.error(`Error checking tickets for lottery ${lotteryId}:`, error);
+                }
+            }
+        }
+        
+        // Modificar la función loadLotteries para actualizar botones después de cargar
+        async function loadLotteriesAndUpdateButtons() {
+            await loadLotteries();
+            await updateTicketButtons();
+        }
+        
+        // Función para verificar conexión existente de MetaMask
+        async function checkExistingConnection() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        currentWalletAddress = accounts[0];
+                        isWalletConnected = true;
+                        updateWalletUI();
+                        console.log('Wallet ya conectado:', currentWalletAddress);
+                    }
+                } catch (error) {
+                    console.error('Error verificando conexión existente:', error);
+                }
+            }
+        }
+        
         // Cargar sorteos cuando la página esté lista
         document.addEventListener('DOMContentLoaded', function() {
-            loadLotteries();
+            checkExistingConnection();
+            updateWalletUI();
+            loadLotteriesAndUpdateButtons();
             
             // Recargar sorteos cada 30 segundos
-            setInterval(loadLotteries, 30000);
+            setInterval(loadLotteriesAndUpdateButtons, 30000);
         });
     </script>
 </body>

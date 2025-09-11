@@ -676,11 +676,68 @@
 
         async function connectWallet() {
             try {
+                // Verificar si MetaMask está instalado
+                if (typeof window.ethereum === 'undefined') {
+                    logActivity('❌ MetaMask no está instalado', 'error');
+                    alert('MetaMask no está instalado. Por favor, instala MetaMask para continuar.');
+                    window.open('https://metamask.io/download/', '_blank');
+                    return;
+                }
+                
                 logActivity('🔗 Conectando MetaMask...', 'info');
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                if (accounts.length === 0) {
+                    logActivity('❌ No se encontraron cuentas en MetaMask', 'error');
+                    return;
+                }
+                
+                // Verificar que estamos en la red correcta (Ganache CLI - Chain ID 1337)
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const expectedChainId = '0x539'; // 1337 en hexadecimal
+                
+                if (chainId !== expectedChainId) {
+                    logActivity('⚠️ Red incorrecta, cambiando a Ganache Local...', 'info');
+                    try {
+                        // Intentar cambiar a la red correcta
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: expectedChainId }],
+                        });
+                        logActivity('✅ Red cambiada a Ganache Local', 'success');
+                    } catch (switchError) {
+                        // Si la red no existe, agregarla
+                        if (switchError.code === 4902) {
+                            logActivity('➕ Agregando red Ganache Local...', 'info');
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: expectedChainId,
+                                    chainName: 'Ganache Local',
+                                    nativeCurrency: {
+                                        name: 'Ethereum',
+                                        symbol: 'ETH',
+                                        decimals: 18
+                                    },
+                                    rpcUrls: ['http://localhost:8545'],
+                                    blockExplorerUrls: null
+                                }]
+                            });
+                            logActivity('✅ Red Ganache Local agregada', 'success');
+                        } else {
+                            logActivity('❌ Error cambiando de red: ' + switchError.message, 'error');
+                        }
+                    }
+                }
+                
                 onAccountConnected(accounts[0]);
+                
             } catch (error) {
-                logActivity('❌ Error conectando: ' + error.message, 'error');
+                if (error.code === 4001) {
+                    logActivity('❌ Conexión rechazada por el usuario', 'error');
+                } else {
+                    logActivity('❌ Error conectando: ' + error.message, 'error');
+                }
             }
         }
 

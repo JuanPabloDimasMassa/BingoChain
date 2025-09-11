@@ -8,8 +8,8 @@ spring:
     name: bingochain-backend
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/bingo_crypto
-    username: postgres
+    url: jdbc:postgresql://localhost:5434/bingo_crypto
+    username: Postgres
     password: root
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -38,8 +38,8 @@ spring:
 # Blockchain Configuration
 blockchain:
   ethereum:
-    network-url: http://localhost:8545  # Ganache or local node
-    chain-id: 1337  # Local development chain ID
+    network-url: http://localhost:8545
+    chain-id: 1337
     gas-price: 20000000000  # 20 Gwei
     gas-limit: 6721975
   

@@ -24,35 +24,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  # Ganache (Local Ethereum Network) - Running locally with ganache-cli
-  # ganache:
-  #   image: trufflesuite/ganache:latest
-  #   container_name: bingochain-ganache
-  #   ports:
-  #     - "8545:8545"
-  #   command: >
-  #     ganache
-  #     --host 0.0.0.0
-  #     --port 8545
-  #     --networkId 1337
-  #     --chainId 1337
-  #     --gasLimit 10000000
-  #     --gasPrice 20000000000
-  #     --accounts 10
-  #     --deterministic
-  #     --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
-  #     --unlock 0
-  #     --unlock 1
-  #     --unlock 2
-  #   networks:
-  #     - bingochain-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "wget -q --spider http://localhost:8545 || exit 1"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
-  #   restart: unless-stopped
-
   # Backend Java Application
   backend:
     build:
