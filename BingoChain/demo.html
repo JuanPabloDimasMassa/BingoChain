@@ -595,11 +595,16 @@
         let selectedNumbers = [];
         const maxNumbers = 6;
 
-        // ABI del contrato
+        // ABI del contrato (métodos y eventos necesarios)
         const CONTRACT_ABI = [
             {"inputs": [{"internalType": "uint256", "name": "_lotteryId", "type": "uint256"}, {"internalType": "uint8[6]", "name": "_chosenNumbers", "type": "uint8[6]"}], "name": "buyTicket", "outputs": [], "stateMutability": "payable", "type": "function"},
             {"inputs": [], "name": "getCurrentLottery", "outputs": [{"internalType": "uint256", "name": "lotteryId", "type": "uint256"}, {"internalType": "uint256", "name": "ticketPrice", "type": "uint256"}, {"internalType": "uint256", "name": "prizePool", "type": "uint256"}, {"internalType": "uint256", "name": "totalTickets", "type": "uint256"}, {"internalType": "enum CryptoBingo.LotteryState", "name": "state", "type": "uint8"}, {"internalType": "uint256", "name": "salesStartTime", "type": "uint256"}, {"internalType": "uint256", "name": "salesEndTime", "type": "uint256"}], "stateMutability": "view", "type": "function"},
-            {"inputs": [], "name": "paused", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "view", "type": "function"}
+            {"inputs": [], "name": "currentWeeklyLottery", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "name": "lotteries", "outputs": [{"internalType": "uint256", "name": "lotteryId", "type": "uint256"}, {"internalType": "string", "name": "lotteryName", "type": "string"}, {"internalType": "uint256", "name": "ticketPrice", "type": "uint256"}, {"internalType": "uint256", "name": "prizePool", "type": "uint256"}, {"internalType": "uint256", "name": "totalTickets", "type": "uint256"}, {"internalType": "enum CryptoBingo.LotteryState", "name": "state", "type": "uint8"}, {"internalType": "uint256", "name": "salesStartTime", "type": "uint256"}, {"internalType": "uint256", "name": "salesEndTime", "type": "uint256"}, {"internalType": "uint256", "name": "currentDrawDay", "type": "uint256"}, {"internalType": "uint256", "name": "nextDrawTime", "type": "uint256"}, {"internalType": "bool", "name": "prizesDistributed", "type": "bool"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [{"internalType": "address", "name": "owner", "type": "address"}], "name": "balanceOf", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [{"internalType": "address", "name": "", "type": "address"}, {"internalType": "uint256", "name": "", "type": "uint256"}], "name": "playerTickets", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+            {"inputs": [], "name": "paused", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "view", "type": "function"},
+            {"anonymous": false, "inputs": [{"indexed": true, "internalType": "uint256", "name": "lotteryId", "type": "uint256"}, {"indexed": true, "internalType": "address", "name": "buyer", "type": "address"}, {"indexed": true, "internalType": "uint256", "name": "ticketId", "type": "uint256"}, {"indexed": false, "internalType": "uint256", "name": "tokenId", "type": "uint256"}, {"indexed": false, "internalType": "uint8[6]", "name": "chosenNumbers", "type": "uint8[6]"}], "name": "TicketPurchased", "type": "event"}
         ];
 
         // Inicialización
@@ -623,6 +628,9 @@
                 if (lotteryInfo) {
                     const lottery = JSON.parse(lotteryInfo);
                     
+                    // Guardar en variable global para uso posterior
+                    currentLotteryInfo = lottery;
+                    
                     // Actualizar el título de la página
                     document.title = `🎮 ${lottery.name} - BingoChain`;
                     
@@ -635,14 +643,36 @@
                     // Mostrar información del sorteo en el log
                     logActivity(`🎯 Sorteo seleccionado: ${lottery.name}`, 'success');
                     logActivity(`💰 Precio del boleto: ${lottery.ticketPrice} ETH`, 'info');
+                    logActivity(`🆔 ID del sorteo: ${lottery.id}`, 'info');
                     
-                    // Limpiar la información del localStorage después de usarla
-                    localStorage.removeItem('selectedLottery');
+                    // NO limpiar la información del localStorage, la necesitamos para la compra
+                    // localStorage.removeItem('selectedLottery');
                 } else {
                     logActivity('⚠️ No se seleccionó ningún sorteo específico', 'warning');
+                    // Intentar obtener información del sorteo actual desde el backend
+                    loadCurrentLottery();
                 }
             } catch (error) {
                 logActivity('❌ Error cargando información del sorteo: ' + error.message, 'error');
+            }
+        }
+        
+        // Función para cargar el sorteo actual desde el backend
+        async function loadCurrentLottery() {
+            try {
+                const response = await fetch('http://localhost:3500/api/v1/lotteries/current');
+                if (response.ok) {
+                    const lottery = await response.json();
+                    currentLotteryInfo = {
+                        id: lottery.id,
+                        name: lottery.lotteryName,
+                        ticketPrice: parseFloat(lottery.ticketPrice)
+                    };
+                    logActivity(`🎯 Sorteo actual cargado: ${lottery.lotteryName}`, 'success');
+                    logActivity(`💰 Precio: ${lottery.ticketPrice} ETH`, 'info');
+                }
+            } catch (error) {
+                console.warn('No se pudo cargar el sorteo actual:', error);
             }
         }
 
@@ -882,6 +912,9 @@
             logActivity('🧹 Selección limpiada', 'info');
         }
 
+        // Variable global para almacenar información del sorteo
+        let currentLotteryInfo = null;
+
         async function buyTicket() {
             if (!userAccount) {
                 logActivity('❌ Conecta tu billetera primero', 'error');
@@ -896,20 +929,283 @@
             try {
                 logActivity('🎫 Iniciando compra de boleto...', 'info');
                 
+                // Obtener información del sorteo
+                let lotteryInfo = currentLotteryInfo;
+                if (!lotteryInfo) {
+                    const storedLottery = localStorage.getItem('selectedLottery');
+                    if (storedLottery) {
+                        lotteryInfo = JSON.parse(storedLottery);
+                        currentLotteryInfo = lotteryInfo;
+                    }
+                }
+                
+                // Obtener lotteryId - intentar desde localStorage, luego desde contrato, o usar 1 como fallback
+                let lotteryId = 1;
+                if (lotteryInfo && lotteryInfo.id) {
+                    lotteryId = parseInt(lotteryInfo.id);
+                    logActivity(`🎯 Sorteo ID: ${lotteryId} - ${lotteryInfo.name || 'Sin nombre'}`, 'info');
+                } else {
+                    try {
+                        // Intentar obtener el sorteo actual del contrato
+                        const currentLottery = await contract.methods.currentWeeklyLottery().call();
+                        if (currentLottery) {
+                            lotteryId = parseInt(currentLottery);
+                            logActivity(`🎯 Usando sorteo actual del contrato: ${lotteryId}`, 'info');
+                        }
+                    } catch (e) {
+                        logActivity('⚠️ No se pudo obtener lotteryId del contrato, usando ID: 1', 'warning');
+                    }
+                }
+                
                 const sortedNumbers = selectedNumbers.sort((a, b) => a - b);
                 const uint8Numbers = sortedNumbers.map(num => parseInt(num));
                 
                 logActivity('📝 Números seleccionados: ' + sortedNumbers.join(', '), 'info');
                 
-                const transaction = await contract.methods.buyTicket(1, uint8Numbers).send({
+                // Obtener precio del ticket
+                let ticketPrice = '0.01'; // Precio por defecto
+                if (lotteryInfo && lotteryInfo.ticketPrice) {
+                    ticketPrice = lotteryInfo.ticketPrice.toString();
+                } else {
+                    try {
+                        // Intentar obtener el precio del contrato
+                        const lottery = await contract.methods.lotteries(lotteryId).call();
+                        if (lottery && lottery.ticketPrice) {
+                            ticketPrice = web3.utils.fromWei(lottery.ticketPrice.toString(), 'ether');
+                        }
+                    } catch (e) {
+                        console.warn('No se pudo obtener precio del contrato, usando 0.01 ETH', e);
+                    }
+                }
+                
+                // Realizar transacción en la blockchain
+                logActivity(`💰 Precio: ${ticketPrice} ETH`, 'info');
+                const transaction = await contract.methods.buyTicket(lotteryId, uint8Numbers).send({
                     from: userAccount,
-                    value: web3.utils.toWei('0.01', 'ether'),
+                    value: web3.utils.toWei(ticketPrice, 'ether'),
                     gas: 1000000,
                     gasPrice: web3.utils.toWei('20', 'gwei')
                 });
                 
-                logActivity('✅ ¡Boleto comprado exitosamente!', 'success');
+                logActivity('✅ ¡Boleto comprado exitosamente en blockchain!', 'success');
                 logActivity(`🔗 Hash de transacción: ${transaction.transactionHash}`, 'info');
+                
+                // Obtener ticketId del evento TicketPurchased
+                let contractTicketId = null;
+                let tokenId = null;
+                
+                console.log('Transaction object:', transaction);
+                console.log('Transaction events:', transaction.events);
+                
+                // Intentar obtener el evento de diferentes maneras (Web3.js puede estructurar los eventos de diferentes formas)
+                let ticketPurchasedEvent = null;
+                
+                // Método 1: events.TicketPurchased (Web3.js v1.0+)
+                if (transaction.events && transaction.events.TicketPurchased) {
+                    ticketPurchasedEvent = transaction.events.TicketPurchased;
+                    // Puede ser un objeto único o un array
+                    if (Array.isArray(ticketPurchasedEvent)) {
+                        ticketPurchasedEvent = ticketPurchasedEvent[0];
+                    }
+                }
+                
+                // Método 2: events['TicketPurchased'] (alternativa)
+                if (!ticketPurchasedEvent && transaction.events && transaction.events['TicketPurchased']) {
+                    ticketPurchasedEvent = transaction.events['TicketPurchased'];
+                    if (Array.isArray(ticketPurchasedEvent)) {
+                        ticketPurchasedEvent = ticketPurchasedEvent[0];
+                    }
+                }
+                
+                // Método 3: Buscar en todos los eventos
+                if (!ticketPurchasedEvent && transaction.events) {
+                    const eventKeys = Object.keys(transaction.events);
+                    for (const key of eventKeys) {
+                        if (key.includes('TicketPurchased') || key.toLowerCase() === 'ticketpurchased') {
+                            ticketPurchasedEvent = transaction.events[key];
+                            if (Array.isArray(ticketPurchasedEvent)) {
+                                ticketPurchasedEvent = ticketPurchasedEvent[0];
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                // Método 4: Obtener del recibo de la transacción y decodificar eventos
+                if (!ticketPurchasedEvent) {
+                    try {
+                        logActivity('📋 Obteniendo recibo de transacción para buscar eventos...', 'info');
+                        const receipt = await web3.eth.getTransactionReceipt(transaction.transactionHash);
+                        console.log('Transaction receipt:', receipt);
+                        
+                        if (receipt && receipt.logs && receipt.logs.length > 0) {
+                            // Usar el contrato para decodificar eventos del recibo
+                            const decodedEvents = contract.abi.filter(item => 
+                                item.type === 'event' && item.name === 'TicketPurchased'
+                            );
+                            
+                            if (decodedEvents.length > 0) {
+                                const eventABI = decodedEvents[0];
+                                const eventSignature = web3.utils.keccak256(
+                                    `${eventABI.name}(${eventABI.inputs.map(i => i.type).join(',')})`
+                                );
+                                
+                                for (const log of receipt.logs) {
+                                    if (log.topics && log.topics[0] === eventSignature && log.address.toLowerCase() === contract.options.address.toLowerCase()) {
+                                        try {
+                                            // Decodificar usando web3.eth.abi.decodeLog
+                                            const decoded = web3.eth.abi.decodeLog(
+                                                eventABI.inputs,
+                                                log.data,
+                                                log.topics.slice(1)
+                                            );
+                                            
+                                            // Los parámetros indexados están en topics, los no indexados en data
+                                            // ticketId está indexado, así que está en topics
+                                            // tokenId no está indexado, así que está en data
+                                            
+                                            // topic[0] es la firma del evento
+                                            // topic[1] es lotteryId (indexed)
+                                            // topic[2] es buyer (indexed)
+                                            // topic[3] es ticketId (indexed)
+                                            // data contiene tokenId y chosenNumbers (no indexed)
+                                            
+                                            if (log.topics[3]) {
+                                                contractTicketId = web3.utils.toBN(log.topics[3]).toString();
+                                            }
+                                            
+                                            // Decodificar data para obtener tokenId
+                                            if (decoded && decoded.tokenId) {
+                                                tokenId = decoded.tokenId.toString();
+                                            }
+                                            
+                                            if (contractTicketId) {
+                                                logActivity(`🎫 Ticket ID encontrado en recibo: ${contractTicketId}`, 'success');
+                                                if (tokenId) {
+                                                    logActivity(`🆔 Token ID encontrado en recibo: ${tokenId}`, 'info');
+                                                }
+                                                break;
+                                            }
+                                        } catch (decodeError) {
+                                            console.warn('Error decodificando log:', decodeError);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (receiptError) {
+                        console.warn('Error obteniendo recibo:', receiptError);
+                    }
+                }
+                
+                // Si encontramos el evento, extraer los valores
+                if (ticketPurchasedEvent) {
+                    console.log('TicketPurchased event encontrado:', ticketPurchasedEvent);
+                    
+                    // Web3.js v1.0+ estructura: event.returnValues
+                    if (ticketPurchasedEvent.returnValues) {
+                        contractTicketId = ticketPurchasedEvent.returnValues.ticketId?.toString() || 
+                                          ticketPurchasedEvent.returnValues.ticketId;
+                        tokenId = ticketPurchasedEvent.returnValues.tokenId?.toString() || 
+                                 ticketPurchasedEvent.returnValues.tokenId;
+                    }
+                    // Web3.js estructura alternativa
+                    else if (ticketPurchasedEvent.args) {
+                        contractTicketId = ticketPurchasedEvent.args.ticketId?.toString() || 
+                                          ticketPurchasedEvent.args.ticketId;
+                        tokenId = ticketPurchasedEvent.args.tokenId?.toString() || 
+                                 ticketPurchasedEvent.args.tokenId;
+                    }
+                    // Estructura directa
+                    else {
+                        contractTicketId = ticketPurchasedEvent.ticketId?.toString() || 
+                                          ticketPurchasedEvent.ticketId;
+                        tokenId = ticketPurchasedEvent.tokenId?.toString() || 
+                                 ticketPurchasedEvent.tokenId;
+                    }
+                    
+                    if (contractTicketId) {
+                        logActivity(`🎫 Ticket ID del contrato: ${contractTicketId}`, 'success');
+                    }
+                    if (tokenId) {
+                        logActivity(`🆔 Token ID (NFT): ${tokenId}`, 'info');
+                    }
+                }
+                
+                // Si aún no tenemos ticketId, intentar obtenerlo del contrato
+                if (!contractTicketId) {
+                    logActivity('⚠️ No se pudo obtener ticketId del evento, obteniendo del contrato...', 'warning');
+                    try {
+                        // Obtener el balance de NFTs primero
+                        const balance = await contract.methods.balanceOf(userAccount).call();
+                        logActivity(`📊 Balance de NFTs del usuario: ${balance}`, 'info');
+                        
+                        if (balance > 0) {
+                            // Intentar obtener todos los tickets del jugador iterando
+                            // Nota: playerTickets es un mapping, necesitamos conocer el índice
+                            // Alternativamente, podemos usar el balance como referencia para el ticketId
+                            // En el contrato, ticketId = tokenId, así que podemos usar el balance
+                            contractTicketId = balance.toString();
+                            logActivity(`🎫 Usando balance como ticketId: ${contractTicketId}`, 'info');
+                        } else {
+                            // Si no hay balance aún, el ticket recién comprado debería ser el primero
+                            // Usar el número de transacción o parte del hash
+                            contractTicketId = '1'; // Primer ticket
+                            logActivity(`🎫 Asumiendo ticketId 1 (primer ticket)`, 'info');
+                        }
+                    } catch (e) {
+                        console.error('Error obteniendo ticketId del contrato:', e);
+                        // Último recurso: usar parte del hash de transacción
+                        contractTicketId = transaction.transactionHash.substring(2, 22);
+                        logActivity(`⚠️ Usando hash de transacción como ticketId (fallback): ${contractTicketId}`, 'warning');
+                    }
+                }
+                
+                // Asegurar que tenemos un ticketId válido
+                if (!contractTicketId) {
+                    contractTicketId = transaction.transactionHash.substring(2, 22);
+                    logActivity(`⚠️ Usando hash de transacción como ticketId (último recurso): ${contractTicketId}`, 'warning');
+                }
+                
+                // Registrar el boleto en la base de datos
+                try {
+                    logActivity('💾 Registrando boleto en la base de datos...', 'info');
+                    
+                    const ticketData = {
+                        walletAddress: userAccount,
+                        lotteryId: lotteryId,
+                        chosenNumbers: JSON.stringify(sortedNumbers),
+                        ticketPrice: parseFloat(ticketPrice),
+                        transactionHash: transaction.transactionHash,
+                        contractTicketId: contractTicketId ? contractTicketId.toString() : tokenId ? tokenId.toString() : Date.now().toString()
+                    };
+                    
+                    console.log('Enviando datos al backend:', ticketData);
+                    console.log('URL:', 'http://localhost:3500/api/v1/tickets/purchase');
+                    
+                    const response = await fetch('http://localhost:3500/api/v1/tickets/purchase', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(ticketData)
+                    });
+                    
+                    console.log('Respuesta del servidor:', response.status, response.statusText);
+                    
+                    if (response.ok) {
+                        const savedTicket = await response.json();
+                        logActivity('✅ ¡Boleto registrado exitosamente en la base de datos!', 'success');
+                        logActivity(`📋 ID de boleto en BD: ${savedTicket.id}`, 'info');
+                    } else {
+                        const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
+                        logActivity(`⚠️ Boleto comprado en blockchain pero error al registrar en BD: ${errorData.message || response.statusText}`, 'warning');
+                    }
+                } catch (dbError) {
+                    logActivity(`⚠️ Boleto comprado en blockchain pero error al registrar en BD: ${dbError.message}`, 'warning');
+                    console.error('Error registrando boleto en BD:', dbError);
+                }
                 
                 // Efectos visuales de éxito
                 createConfetti();
@@ -922,6 +1218,7 @@
                 
             } catch (error) {
                 logActivity('❌ Error en compra: ' + error.message, 'error');
+                console.error('Error completo:', error);
             }
         }
 

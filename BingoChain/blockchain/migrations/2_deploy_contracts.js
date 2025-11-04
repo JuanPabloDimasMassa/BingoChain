@@ -20,7 +20,7 @@ module.exports = async function (deployer, network, accounts) {
     
     try {
       const tx = await cryptoBingo.createWeeklyLottery(
-        "Sorteo Semanal #1 - BingoChain",
+        "BingoChain - Lotería Descentralizada",
         ticketPrice,
         salesStartTime,
         { from: accounts[0], gas: 2000000 }

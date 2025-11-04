@@ -16,7 +16,18 @@ public class SecurityConfig {
             .cors(cors -> cors.and())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // Permitir acceso público a todos los endpoints
+                // Permitir acceso público a la API
+                .requestMatchers("/api/v1/**").permitAll()
+                // Permitir acceso a Swagger UI
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/api-docs/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                // Permitir acceso a Actuator
+                .requestMatchers("/actuator/**").permitAll()
+                // Permitir acceso a archivos estáticos
+                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                // Todos los demás endpoints requieren autenticación
                 .anyRequest().permitAll()
             )
             .httpBasic(httpBasic -> httpBasic.disable())

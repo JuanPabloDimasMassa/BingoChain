@@ -64,8 +64,7 @@ public class WeeklyLotteryService {
      * Create a new weekly lottery
      */
     public WeeklyLottery createLottery(WeeklyLottery lottery) {
-        lottery.setCreatedAt(LocalDateTime.now());
-        lottery.setUpdatedAt(LocalDateTime.now());
+        // Las fechas createdAt y updatedAt se manejan automáticamente por @CreationTimestamp y @UpdateTimestamp
         return weeklyLotteryRepository.save(lottery);
     }
 

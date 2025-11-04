@@ -29,14 +29,44 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Función para verificar si un puerto está en uso
+# Función para verificar si un puerto está en uso (múltiples métodos)
 check_port() {
     local port=$1
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
-        return 0  # Puerto en uso
-    else
-        return 1  # Puerto libre
+    
+    # Método 1: lsof
+    if command -v lsof &> /dev/null; then
+        if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+            return 0  # Puerto en uso
+        fi
     fi
+    
+    # Método 2: netstat (disponible en muchos sistemas)
+    if command -v netstat &> /dev/null; then
+        if netstat -tuln 2>/dev/null | grep -q ":$port.*LISTEN"; then
+            return 0  # Puerto en uso
+        fi
+    fi
+    
+    # Método 3: ss (disponible en sistemas modernos Linux)
+    if command -v ss &> /dev/null; then
+        if ss -tuln 2>/dev/null | grep -q ":$port.*LISTEN"; then
+            return 0  # Puerto en uso
+        fi
+    fi
+    
+    # Método 4: Prueba de conexión TCP directa
+    if command -v nc &> /dev/null; then
+        if nc -z localhost $port >/dev/null 2>&1; then
+            return 0  # Puerto en uso
+        fi
+    elif command -v timeout &> /dev/null; then
+        # Usar timeout con bash para probar conexión TCP
+        if timeout 1 bash -c "echo > /dev/tcp/localhost/$port" >/dev/null 2>&1; then
+            return 0  # Puerto en uso
+        fi
+    fi
+    
+    return 1  # Puerto no detectado
 }
 
 # Función para esperar a que un servicio esté listo
@@ -124,20 +154,87 @@ fi
 
 print_success "Todas las dependencias están instaladas"
 
-# 1. Levantar Base de Datos y Redis
-print_status "Levantando PostgreSQL y Redis..."
-docker-compose up -d postgres redis
+# Función para verificar conexión real a PostgreSQL
+check_postgres_connection() {
+    local host=${1:-localhost}
+    local port=${2:-5432}
+    local user=${3:-postgres}
+    local password=${4:-root}
+    local database=${5:-bingo_crypto}
+    
+    # Método 1: psql (más confiable)
+    if command -v psql &> /dev/null; then
+        if PGPASSWORD=$password psql -h $host -p $port -U $user -d $database -c "SELECT 1;" >/dev/null 2>&1; then
+            return 0  # Conexión exitosa
+        fi
+    fi
+    
+    # Método 2: Prueba de conexión TCP (verificar que el puerto acepta conexiones)
+    if command -v nc &> /dev/null; then
+        if nc -z -w 2 $host $port >/dev/null 2>&1; then
+            return 0  # Puerto acepta conexiones
+        fi
+    elif command -v timeout &> /dev/null; then
+        if timeout 2 bash -c "echo > /dev/tcp/$host/$port" >/dev/null 2>&1; then
+            return 0  # Puerto acepta conexiones
+        fi
+    fi
+    
+    return 1  # No se pudo conectar
+}
 
-# Esperar a que los servicios estén listos
-print_status "Esperando a que los servicios estén listos..."
-sleep 5
+# 1. Verificar PostgreSQL externo y levantar Redis
+print_status "Verificando PostgreSQL externo..."
 
-# Verificar PostgreSQL
-if docker ps | grep -q "bingochain-postgres.*healthy"; then
-    print_success "PostgreSQL está listo!"
+# Primero intentar verificación de puerto (no crítica, solo informativa)
+PORT_DETECTED=false
+if check_port 5432; then
+    print_success "Puerto 5432 detectado en uso"
+    PORT_DETECTED=true
 else
-    print_warning "PostgreSQL puede no estar completamente listo, pero continuando..."
+    print_warning "No se pudo detectar el puerto 5432 en uso (esto puede ser normal)"
 fi
+
+# Verificación crítica: conexión real a PostgreSQL
+print_status "Verificando conexión a PostgreSQL en localhost:5432..."
+if check_postgres_connection localhost 5432 postgres root bingo_crypto; then
+    print_success "Conexión a PostgreSQL exitosa!"
+    if [ "$PORT_DETECTED" = false ]; then
+        print_warning "Nota: El puerto no se detectó pero la conexión funciona correctamente"
+    fi
+else
+    print_error "No se pudo conectar a PostgreSQL"
+    print_error "Por favor verifica:"
+    print_error "  1. PostgreSQL está corriendo y escuchando en el puerto 5432"
+    print_error "  2. La base de datos 'bingo_crypto' existe"
+    print_error "  3. Las credenciales son correctas (usuario: postgres, password: root)"
+    print_error "  4. El acceso desde localhost está permitido en pg_hba.conf"
+    exit 1
+fi
+
+# Verificación adicional de la base de datos específica
+print_status "Verificando acceso a la base de datos 'bingo_crypto'..."
+if command -v psql &> /dev/null; then
+    if PGPASSWORD=root psql -h localhost -p 5432 -U postgres -d bingo_crypto -c "SELECT 1;" >/dev/null 2>&1; then
+        print_success "Base de datos 'bingo_crypto' accesible!"
+    else
+        print_error "No se pudo acceder a la base de datos 'bingo_crypto'"
+        print_error "La base de datos puede no existir. Verifica o créala con:"
+        print_error "  psql -h localhost -p 5432 -U postgres -c \"CREATE DATABASE bingo_crypto;\""
+        exit 1
+    fi
+else
+    print_warning "psql no está disponible, no se puede verificar el acceso a la base de datos específica"
+    print_warning "Asegúrate de que la base de datos 'bingo_crypto' existe"
+fi
+
+# Levantar solo Redis
+print_status "Levantando Redis..."
+docker-compose up -d redis
+
+# Esperar a que Redis esté listo
+print_status "Esperando a que Redis esté listo..."
+sleep 3
 
 # Verificar Redis
 if docker ps | grep -q "bingochain-redis"; then
@@ -210,6 +307,14 @@ sed -i "s/address: \".*\"/address: \"$CONTRACT_ADDRESS\"/" backend/src/main/reso
 sed -i "s|network-url: .*|network-url: http://localhost:8545|" backend/src/main/resources/application.yml
 sed -i "s/chain-id: .*/chain-id: 1337/" backend/src/main/resources/application.yml
 
+# Actualizar contract address en archivos HTML
+print_status "Actualizando contract address en frontend..."
+sed -i "s/CONTRACT_ADDRESS: '0x[^']*'/CONTRACT_ADDRESS: '$CONTRACT_ADDRESS'/" main.html
+sed -i "s/CONTRACT_ADDRESS: '0x[^']*'/CONTRACT_ADDRESS: '$CONTRACT_ADDRESS'/" demo.html  
+sed -i "s/CONTRACT_ADDRESS: '0x[^']*'/CONTRACT_ADDRESS: '$CONTRACT_ADDRESS'/" mis-boletos.html
+# Actualizar también la dirección mostrada en el HTML
+sed -i "s/<code>0x[^<]*<\/code>/<code>$CONTRACT_ADDRESS<\/code>/" main.html
+
 # 3. Levantar Backend Java
 print_status "Iniciando backend Java Spring Boot..."
 cd backend
@@ -238,7 +343,7 @@ echo "🎉 ¡BingoChain está completamente operativo!"
 echo "============================================="
 echo ""
 print_success "Servicios disponibles:"
-echo "  🗄️  PostgreSQL:     localhost:5434"
+echo "  🗄️  PostgreSQL:     localhost:5432 (externo)"
 echo "  🔴 Redis:          localhost:6379"
 echo "  ⛓️  Ganache CLI:    localhost:8545"
 echo "  🔧 Backend API:    http://localhost:3500/api/v1"
@@ -249,6 +354,12 @@ echo "  🏠 Página de Inicio:    http://localhost:8080/"
 echo "  📊 Panel Principal:     http://localhost:8080/main.html"
 echo "  🎮 Demo Principal:      http://localhost:8080/demo.html"
 echo "  🎫 Mis Boletos:         http://localhost:8080/mis-boletos.html"
+echo "  🔐 Panel Admin:         http://localhost:8080/admin.html"
+echo ""
+print_success "URLs de desarrollo:"
+echo "  📚 Swagger UI:         http://localhost:3500/api/v1/swagger-ui/index.html"
+echo "  🔍 API Docs:           http://localhost:3500/api/v1/api-docs"
+echo "  🏥 Health Check:       http://localhost:3500/api/v1/health"
 echo ""
 print_success "Información del contrato:"
 echo "  📍 Dirección: $CONTRACT_ADDRESS"

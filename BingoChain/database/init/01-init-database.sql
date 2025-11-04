@@ -26,43 +26,8 @@ CREATE INDEX IF NOT EXISTS idx_draw_events_scheduled_time ON draw_events(schedul
 
 \echo 'Database indexes created successfully!'
 
--- Insert some initial data for development
-INSERT INTO weekly_lotteries (
-    contract_address, 
-    lottery_name, 
-    ticket_price, 
-    prize_pool, 
-    total_tickets, 
-    status, 
-    sales_start_time,
-    sales_end_time,
-    current_draw_day,
-    next_draw_time,
-    drawn_numbers,
-    winner_addresses,
-    prizes_distributed,
-    created_at, 
-    updated_at
-) VALUES 
-(
-    '0x1234567890123456789012345678901234567890',
-    'Demo Weekly Lottery #1',
-    0.01,
-    0.00,
-    0,
-    'TICKET_SALES',
-    NOW() + INTERVAL '1 hour',
-    NOW() + INTERVAL '25 hours',
-    0,
-    NOW() + INTERVAL '25.5 hours',
-    '[]',
-    '[]',
-    false,
-    NOW(),
-    NOW()
-) ON CONFLICT DO NOTHING;
-
-\echo 'Initial demo data inserted successfully!'
+-- No initial data insertion - all data will be created dynamically
+\echo 'Database schema created without test data - ready for dynamic data!'
 \echo 'BingoChain database initialization completed!'
 
 -- Create a view for lottery statistics

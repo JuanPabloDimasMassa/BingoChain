@@ -8,8 +8,8 @@ spring:
     name: bingochain-backend
   
   datasource:
-    url: jdbc:postgresql://localhost:5434/bingo_crypto
-    username: Postgres
+    url: jdbc:postgresql://localhost:5432/bingo_crypto
+    username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
     hikari:
@@ -46,7 +46,11 @@ blockchain:
   contract:
     crypto-bingo:
       address: "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10"  # Deployed contract address
-    
+
+# Admin Configuration
+admin:
+  token: "bingochain-admin-2024-secure-token"  # Cambiar en producción
+
 # CORS Configuration
 cors:
   allowed-origins:
@@ -83,3 +87,23 @@ management:
   endpoint:
     health:
       show-details: always
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+    displayRequestDuration: true
+  show-actuator: true
+  group-configs:
+    - group: 'bingochain-api'
+      display-name: 'BingoChain API'
+      paths-to-match: '/**'
+      packages-to-scan: 'com.bingochain.controller'

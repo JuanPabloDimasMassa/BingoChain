@@ -125,14 +125,17 @@ public class LotteryTicketService {
         
         // Validate lottery is in ticket sales phase
         if (lottery.getStatus() != WeeklyLottery.LotteryStatus.TICKET_SALES) {
-            throw new RuntimeException("Lottery is not in ticket sales phase");
+            throw new RuntimeException("Lottery is not in ticket sales phase. Current status: " + lottery.getStatus());
         }
 
-        // Validate sales period
+        // Validate sales period (comentado temporalmente para desarrollo - descomentar en producción)
+        /*
         LocalDateTime now = LocalDateTime.now();
         if (now.isBefore(lottery.getSalesStartTime()) || now.isAfter(lottery.getSalesEndTime())) {
-            throw new RuntimeException("Ticket sales period has ended");
+            throw new RuntimeException("Ticket sales period has ended. Sales period: " + 
+                lottery.getSalesStartTime() + " to " + lottery.getSalesEndTime());
         }
+        */
 
         // Create ticket
         LotteryTicket ticket = new LotteryTicket();

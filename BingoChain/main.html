@@ -79,41 +79,156 @@
             font-weight: 600;
         }
         
-        .lotteries-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
-            gap: 25px; 
-            margin-bottom: 30px;
+        /* Carrusel de Sorteos */
+        .lottery-carousel {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+        
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            height: 100%;
+        }
+        
+        .lottery-slide {
+            min-width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
         }
         
         .lottery-card { 
+            width: 100%;
+            max-width: 800px;
             background: rgba(255,255,255,0.1); 
             backdrop-filter: blur(20px); 
-            padding: 25px; 
-            border-radius: 20px; 
+            padding: 40px; 
+            border-radius: 25px; 
             border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
-            animation: fadeInUp 1s ease-out both;
+            position: relative;
+            overflow: hidden;
         }
         
-        .lottery-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        .lottery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            pointer-events: none;
         }
         
         .lottery-card.active {
             border: 2px solid #4CAF50;
-            box-shadow: 0 0 30px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 0 40px rgba(76, 175, 80, 0.4), 0 20px 50px rgba(0,0,0,0.2);
+            transform: scale(1.02);
         }
         
         .lottery-card.completed {
             border: 2px solid #FF9800;
-            opacity: 0.8;
+            opacity: 0.7;
+            filter: grayscale(30%);
+            background: rgba(128,128,128,0.1);
+        }
+        
+        .lottery-card.completed::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.2);
+            pointer-events: none;
         }
         
         .lottery-card.upcoming {
             border: 2px solid #2196F3;
+            background: rgba(33, 150, 243, 0.1);
+        }
+        
+        /* Navegación del Carrusel */
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .carousel-nav:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .carousel-nav.prev {
+            left: 20px;
+        }
+        
+        .carousel-nav.next {
+            right: 20px;
+        }
+        
+        .carousel-nav i {
+            font-size: 20px;
+            color: white;
+        }
+        
+        /* Indicadores del Carrusel */
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .carousel-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-indicator.active {
+            background: #4CAF50;
+            transform: scale(1.2);
+        }
+        
+        .carousel-indicator.completed {
+            background: #FF9800;
+        }
+        
+        .carousel-indicator.upcoming {
+            background: #2196F3;
         }
         
         .lottery-header { 
@@ -215,6 +330,35 @@
             font-size: 1.1em;
         }
         
+        .no-lotteries {
+            text-align: center;
+            padding: 50px 30px;
+            color: #ffffff;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px;
+        }
+        
+        .no-lotteries-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        
+        .no-lotteries h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .no-lotteries p {
+            color: #cccccc;
+            margin: 10px 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
         .status { 
             background: rgba(255,255,255,0.1); 
             backdrop-filter: blur(20px); 
@@ -286,7 +430,7 @@
         
         /* Modal styles */
         .modal {
-            display: none;
+            display: none !important;
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -296,6 +440,16 @@
             overflow: auto;
             background-color: rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
+            pointer-events: none;
+            visibility: hidden;
+            opacity: 0;
+        }
+        
+        .modal.show {
+            display: block !important;
+            pointer-events: auto !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         .modal-content {
@@ -465,14 +619,40 @@
         }
         
         @media (max-width: 768px) {
-            .lotteries-grid { 
-                grid-template-columns: 1fr; 
+            .lottery-carousel {
+                margin: 0 auto 20px;
+            }
+            
+            .carousel-container {
+                height: 600px;
+            }
+            
+            .lottery-card {
+                padding: 30px 20px;
+                font-size: 0.9em;
             }
             
             .lottery-header { 
                 flex-direction: column; 
                 align-items: flex-start; 
                 gap: 10px;
+            }
+            
+            .carousel-nav {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .carousel-nav.prev {
+                left: 10px;
+            }
+            
+            .carousel-nav.next {
+                right: 10px;
+            }
+            
+            .carousel-nav i {
+                font-size: 16px;
             }
             
             .modal-content {
@@ -507,8 +687,25 @@
         
         <div class="lotteries-section">
             <h2 class="section-title">🎲 Sorteos Disponibles</h2>
-            <div id="lotteries-list" class="lotteries-grid">
-                <div class="loading">🔄 Cargando sorteos...</div>
+            <div id="lotteries-carousel" class="lottery-carousel">
+                <div class="carousel-container">
+                    <div class="carousel-track" id="carousel-track">
+                        <div class="lottery-slide">
+                            <div class="loading">🔄 Cargando sorteos...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navegación -->
+                    <button class="carousel-nav prev" id="carousel-prev" onclick="moveCarousel(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-nav next" id="carousel-next" onclick="moveCarousel(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Indicadores -->
+                <div class="carousel-indicators" id="carousel-indicators"></div>
             </div>
         </div>
         
@@ -545,7 +742,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">🎫 Mis Boletos</h2>
-                <span class="close" onclick="closeTicketsModal()">&times;</span>
+                <span class="close" onclick="closeTicketsModal(); return false;" style="cursor: pointer; user-select: none;">&times;</span>
             </div>
             <div id="modalContent">
                 <div class="loading" id="modalLoading">🔄 Cargando boletos...</div>
@@ -554,13 +751,18 @@
     </div>
 
     <script>
+        // Variables del carrusel
+        let currentSlide = 0;
+        let lotteries = [];
+        let autoSlideInterval;
+        
         // Función para cargar sorteos desde la API
         async function loadLotteries() {
-            const lotteriesList = document.getElementById('lotteries-list');
+            const carouselTrack = document.getElementById('carousel-track');
             
             try {
                 // Mostrar loading
-                lotteriesList.innerHTML = '<div class="loading">🔄 Cargando sorteos...</div>';
+                carouselTrack.innerHTML = '<div class="lottery-slide"><div class="loading">🔄 Cargando sorteos...</div></div>';
                 
                 // Hacer petición a la API
                 const response = await fetch('http://localhost:3500/api/v1/lotteries');
@@ -569,20 +771,89 @@
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
                 
-                const lotteries = await response.json();
+                let allLotteries = await response.json();
                 
-                if (!lotteries || lotteries.length === 0) {
-                    lotteriesList.innerHTML = '<div class="error">❌ No hay sorteos disponibles</div>';
+                if (!allLotteries || allLotteries.length === 0) {
+                    carouselTrack.innerHTML = `
+                        <div class="lottery-slide">
+                            <div class="no-lotteries">
+                                <div class="no-lotteries-icon">🎲</div>
+                                <h3>No hay sorteos activos</h3>
+                                <p>Los sorteos se crean dinámicamente cuando se despliegan nuevos contratos.</p>
+                                <p>¡Mantente atento para participar en el próximo sorteo!</p>
+                                <button class="btn btn-primary" onclick="loadLotteries()" style="margin-top: 15px;">
+                                    🔄 Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    `;
                     return;
                 }
                 
-                // Generar HTML para cada sorteo
-                const lotteriesHTML = lotteries.map(lottery => {
-                    const status = getLotteryStatus(lottery);
-                    const statusClass = getStatusClass(status);
-                    const statusText = getStatusText(status);
-                    
-                    return `
+                // Filtrar y seleccionar solo los 3 sorteos relevantes
+                lotteries = selectRelevantLotteries(allLotteries);
+                
+                if (lotteries.length === 0) {
+                    carouselTrack.innerHTML = `
+                        <div class="lottery-slide">
+                            <div class="no-lotteries">
+                                <div class="no-lotteries-icon">🎲</div>
+                                <h3>No hay sorteos disponibles</h3>
+                                <p>No se encontraron sorteos para mostrar.</p>
+                                <button class="btn btn-primary" onclick="loadLotteries()" style="margin-top: 15px;">
+                                    🔄 Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Generar slides del carrusel
+                renderCarousel();
+                setupCarouselIndicators();
+                
+                // Encontrar el índice del sorteo vigente (active) para iniciar ahí
+                let activeIndex = 0;
+                for (let i = 0; i < lotteries.length; i++) {
+                    if (getLotteryStatus(lotteries[i]) === 'active') {
+                        activeIndex = i;
+                        break;
+                    }
+                }
+                
+                // Iniciar en el sorteo vigente (o en el primero si no hay vigente)
+                currentSlide = activeIndex;
+                updateCarousel();
+                
+                // NO iniciar auto-slide - el carrusel será manual
+                // startAutoSlide(); // Desactivado - carrusel manual
+                
+            } catch (error) {
+                console.error('Error cargando sorteos:', error);
+                carouselTrack.innerHTML = `
+                    <div class="lottery-slide">
+                        <div class="error">
+                            ❌ Error cargando sorteos: ${error.message}
+                            <br><br>
+                            <button class="btn btn-primary" onclick="loadLotteries()">🔄 Reintentar</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Función para renderizar el carrusel
+        function renderCarousel() {
+            const carouselTrack = document.getElementById('carousel-track');
+            
+            const slidesHTML = lotteries.map((lottery, index) => {
+                const status = getLotteryStatus(lottery);
+                const statusClass = getStatusClass(status);
+                const statusText = getStatusText(status);
+                
+                return `
+                    <div class="lottery-slide">
                         <div class="lottery-card ${statusClass}">
                             <div class="lottery-header">
                                 <div class="lottery-id">Sorteo #${lottery.id}</div>
@@ -590,40 +861,251 @@
                             </div>
                             
                             <div class="lottery-info">
+                                <p><strong>📋 Nombre:</strong> ${lottery.lotteryName || 'Sin nombre'}</p>
                                 <p><strong>📅 Fecha de Inicio:</strong> ${formatDate(lottery.salesStartTime)}</p>
                                 <p><strong>📅 Fecha de Fin:</strong> ${formatDate(lottery.salesEndTime)}</p>
                                 <p><strong>🎫 Precio del Boleto:</strong> ${lottery.ticketPrice} ETH</p>
                                 <p><strong>🏆 Premio Total:</strong> ${lottery.prizePool || '0'} ETH</p>
-                                <p><strong>🎲 Números Ganadores:</strong> ${lottery.drawnNumbers ? lottery.drawnNumbers.join(', ') : 'Pendiente'}</p>
+                                <p><strong>🎲 Números Ganadores:</strong> ${formatDrawnNumbers(lottery.drawnNumbers)}</p>
+                                ${status === 'completed' ? `<p><strong>🏁 Finalizado:</strong> ${formatDate(lottery.salesEndTime)}</p>` : ''}
                             </div>
                             
                             <div class="lottery-actions">
                                 ${status === 'active' ? 
-                                    `<button class="btn btn-primary" onclick="playLottery(${lottery.id}, '${lottery.lotteryName}', ${lottery.ticketPrice})">🎮 Jugar Ahora</button>` : 
+                                    (function() {
+                                        // Verificar si hay números sorteados
+                                        let hasDrawnNumbers = false;
+                                        try {
+                                            if (lottery.drawnNumbers) {
+                                                const drawnNumbers = typeof lottery.drawnNumbers === 'string' 
+                                                    ? JSON.parse(lottery.drawnNumbers) 
+                                                    : lottery.drawnNumbers;
+                                                hasDrawnNumbers = Array.isArray(drawnNumbers) && drawnNumbers.length > 0;
+                                            }
+                                        } catch (e) {
+                                            console.warn('Error parseando números sorteados:', e);
+                                        }
+                                        
+                                        // Si hay números sorteados, no permitir comprar más boletos
+                                        if (hasDrawnNumbers) {
+                                            return `<button class="btn btn-primary" disabled style="opacity: 0.6; cursor: not-allowed;" title="No se pueden comprar más boletos, ya se sortearon números">🚫 Ventas Cerradas</button>`;
+                                        } else {
+                                            return `<button class="btn btn-primary" onclick="playLottery(${lottery.id}, '${lottery.lotteryName}', ${lottery.ticketPrice})">🎮 Jugar Ahora</button>`;
+                                        }
+                                    })() : 
                                     ''
                                 }
-                                <button class="btn btn-secondary" id="viewTicketsBtn_${lottery.id}" onclick="viewMyTickets(${lottery.id}, '${lottery.lotteryName}')">🎫 Ver Mis Boletos</button>
+                                ${status !== 'upcoming' ? 
+                                    `<button class="btn btn-secondary" id="viewTicketsBtn_${lottery.id}" onclick="viewMyTickets(${lottery.id}, '${lottery.lotteryName}')">🎫 Ver Mis Boletos</button>` : 
+                                    ''
+                                }
                                 ${status === 'completed' ? 
                                     `<button class="btn btn-secondary" onclick="viewResults(${lottery.id})">📊 Ver Resultados</button>` : 
                                     ''
                                 }
                             </div>
                         </div>
-                    `;
-                }).join('');
-                
-                lotteriesList.innerHTML = lotteriesHTML;
-                
-            } catch (error) {
-                console.error('Error cargando sorteos:', error);
-                lotteriesList.innerHTML = `
-                    <div class="error">
-                        ❌ Error cargando sorteos: ${error.message}
-                        <br><br>
-                        <button class="btn btn-primary" onclick="loadLotteries()">🔄 Reintentar</button>
                     </div>
                 `;
+            }).join('');
+            
+            carouselTrack.innerHTML = slidesHTML;
+        }
+        
+        // Función para configurar los indicadores
+        function setupCarouselIndicators() {
+            const indicators = document.getElementById('carousel-indicators');
+            
+            const indicatorsHTML = lotteries.map((lottery, index) => {
+                const status = getLotteryStatus(lottery);
+                const statusClass = getStatusClass(status);
+                
+                return `<div class="carousel-indicator ${statusClass}" onclick="goToSlide(${index})"></div>`;
+            }).join('');
+            
+            indicators.innerHTML = indicatorsHTML;
+        }
+        
+        // Función para mover el carrusel (manual)
+        function moveCarousel(direction) {
+            currentSlide += direction;
+            
+            if (currentSlide < 0) {
+                currentSlide = lotteries.length - 1;
+            } else if (currentSlide >= lotteries.length) {
+                currentSlide = 0;
             }
+            
+            updateCarousel();
+        }
+        
+        // Función para ir a un slide específico (manual)
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            updateCarousel();
+        }
+        
+        // Función para actualizar la posición del carrusel
+        function updateCarousel() {
+            const track = document.getElementById('carousel-track');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+            
+            // Mover el track
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            // Actualizar indicadores
+            indicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+            
+            // Actualizar navegación
+            const prevBtn = document.getElementById('carousel-prev');
+            const nextBtn = document.getElementById('carousel-next');
+            
+            if (lotteries.length <= 1) {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+            }
+        }
+        
+        // Función para iniciar auto-slide
+        function startAutoSlide() {
+            if (lotteries.length > 1) {
+                autoSlideInterval = setInterval(() => {
+                    moveCarousel(1);
+                }, 30000); // 30 segundos
+            }
+        }
+        
+        // Función para detener auto-slide
+        function stopAutoSlide() {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+            }
+        }
+        
+        // Función para seleccionar los 3 sorteos relevantes: actual, anterior y próximo
+        function selectRelevantLotteries(allLotteries) {
+            const now = new Date();
+            const selectedLotteries = [];
+            
+            // Clasificar sorteos
+            const activeLotteries = [];
+            const upcomingLotteries = [];
+            const completedLotteries = [];
+            
+            allLotteries.forEach(lottery => {
+                const status = getLotteryStatus(lottery);
+                if (status === 'active') {
+                    activeLotteries.push(lottery);
+                } else if (status === 'upcoming') {
+                    upcomingLotteries.push(lottery);
+                } else {
+                    completedLotteries.push(lottery);
+                }
+            });
+            
+            // 1. Seleccionar el sorteo ACTIVO (el más reciente si hay múltiples)
+            if (activeLotteries.length > 0) {
+                // Ordenar por fecha de inicio (más reciente primero)
+                activeLotteries.sort((a, b) => {
+                    return new Date(b.salesStartTime) - new Date(a.salesStartTime);
+                });
+                selectedLotteries.push(activeLotteries[0]);
+            }
+            
+            // 2. Seleccionar el sorteo COMPLETADO más reciente (anterior)
+            if (completedLotteries.length > 0) {
+                // Ordenar por fecha de fin (más reciente primero)
+                completedLotteries.sort((a, b) => {
+                    const dateA = new Date(a.salesEndTime || a.salesStartTime);
+                    const dateB = new Date(b.salesEndTime || b.salesStartTime);
+                    return dateB - dateA;
+                });
+                // Solo agregar si no está ya en la lista
+                if (!selectedLotteries.find(l => l.id === completedLotteries[0].id)) {
+                    selectedLotteries.push(completedLotteries[0]);
+                }
+            }
+            
+            // 3. Seleccionar el sorteo PRÓXIMO más cercano
+            if (upcomingLotteries.length > 0) {
+                // Ordenar por fecha de inicio (más cercano primero)
+                upcomingLotteries.sort((a, b) => {
+                    return new Date(a.salesStartTime) - new Date(b.salesStartTime);
+                });
+                // Solo agregar si no está ya en la lista
+                if (!selectedLotteries.find(l => l.id === upcomingLotteries[0].id)) {
+                    selectedLotteries.push(upcomingLotteries[0]);
+                }
+            }
+            
+            // Si no tenemos 3 sorteos, rellenar con los más relevantes disponibles
+            if (selectedLotteries.length < 3) {
+                // Prioridad: activos > próximos > completados
+                const remaining = [];
+                
+                // Agregar más activos si hay
+                if (activeLotteries.length > 1) {
+                    remaining.push(...activeLotteries.slice(1));
+                }
+                
+                // Agregar más próximos si hay
+                if (upcomingLotteries.length > 1) {
+                    remaining.push(...upcomingLotteries.slice(1));
+                }
+                
+                // Agregar más completados si hay
+                if (completedLotteries.length > 1) {
+                    remaining.push(...completedLotteries.slice(1));
+                }
+                
+                // Agregar hasta tener 3 sorteos
+                for (const lottery of remaining) {
+                    if (selectedLotteries.length >= 3) break;
+                    if (!selectedLotteries.find(l => l.id === lottery.id)) {
+                        selectedLotteries.push(lottery);
+                    }
+                }
+            }
+            
+            // Limitar a máximo 3 sorteos
+            const finalLotteries = selectedLotteries.slice(0, 3);
+            
+            // Ordenar cronológicamente: anterior (completed), vigente (active), próximo (upcoming)
+            finalLotteries.sort((a, b) => {
+                const statusA = getLotteryStatus(a);
+                const statusB = getLotteryStatus(b);
+                
+                // Orden: completed (anterior) = 0, active (vigente) = 1, upcoming (próximo) = 2
+                const priority = { 'completed': 0, 'active': 1, 'upcoming': 2 };
+                const priorityDiff = priority[statusA] - priority[statusB];
+                
+                // Si tienen la misma prioridad, ordenar por fecha
+                if (priorityDiff === 0) {
+                    if (statusA === 'upcoming') {
+                        // Para próximos, ordenar por fecha de inicio (más cercano primero)
+                        return new Date(a.salesStartTime) - new Date(b.salesStartTime);
+                    } else if (statusA === 'completed') {
+                        // Para completados, ordenar por fecha de fin (más reciente primero)
+                        return new Date(b.salesEndTime || b.salesStartTime) - new Date(a.salesEndTime || a.salesStartTime);
+                    } else if (statusA === 'active') {
+                        // Para activos, ordenar por fecha de inicio (más reciente primero)
+                        return new Date(b.salesStartTime) - new Date(a.salesStartTime);
+                    }
+                }
+                
+                return priorityDiff;
+            });
+            
+            return finalLotteries;
         }
         
         // Función para determinar el estado del sorteo
@@ -673,6 +1155,31 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
+        }
+        
+        // Función para formatear números ganadores
+        function formatDrawnNumbers(drawnNumbers) {
+            try {
+                if (!drawnNumbers) {
+                    return 'Pendiente';
+                }
+                
+                // Si ya es un array, usarlo directamente
+                if (Array.isArray(drawnNumbers)) {
+                    return drawnNumbers.length > 0 ? drawnNumbers.join(', ') : 'Pendiente';
+                }
+                
+                // Si es un string JSON, parsearlo
+                if (typeof drawnNumbers === 'string') {
+                    const parsed = JSON.parse(drawnNumbers);
+                    return parsed.length > 0 ? parsed.join(', ') : 'Pendiente';
+                }
+                
+                return 'Pendiente';
+            } catch (error) {
+                console.error('Error parsing drawn numbers:', error);
+                return 'Pendiente';
+            }
         }
         
         // Función para ver resultados (placeholder)
@@ -815,39 +1322,127 @@
         
         // Función para ver los boletos de un sorteo específico
         async function viewMyTickets(lotteryId, lotteryName) {
+            console.log('Intentando abrir modal para sorteo:', lotteryId, lotteryName);
+            
             if (!isWalletConnected || !currentWalletAddress) {
                 alert('Debes conectar tu wallet primero');
                 return;
             }
             
-            // Mostrar modal
+            // Mostrar modal y limpiar contenido anterior
             const modal = document.getElementById('ticketsModal');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
             const modalLoading = document.getElementById('modalLoading');
             
-            modalTitle.textContent = `🎫 Mis Boletos - ${lotteryName}`;
+            if (!modal) {
+                console.error('Modal no encontrado!');
+                alert('Error: No se pudo encontrar el modal. Por favor recarga la página.');
+                return;
+            }
+            
+            console.log('Estado del modal antes de abrir:', {
+                display: modal.style.display,
+                computedDisplay: window.getComputedStyle(modal).display,
+                classList: modal.classList.toString(),
+                visibility: window.getComputedStyle(modal).visibility,
+                pointerEvents: window.getComputedStyle(modal).pointerEvents
+            });
+            
+            // Limpiar contenido anterior para evitar caché
+            if (modalContent) {
+                modalContent.innerHTML = '';
+            }
+            if (modalLoading) {
+                modalLoading.style.display = 'block';
+                modalLoading.textContent = '🔄 Cargando boletos...';
+            }
+            if (modalTitle) {
+                modalTitle.textContent = `🎫 Mis Boletos - ${lotteryName} (Sorteo #${lotteryId})`;
+            }
+            
+            // Resetear TODAS las propiedades del modal primero
+            modal.style.removeProperty('display');
+            modal.style.removeProperty('visibility');
+            modal.style.removeProperty('pointer-events');
+            modal.style.removeProperty('opacity');
+            modal.style.removeProperty('z-index');
+            
+            // Mostrar modal correctamente - restaurar todas las propiedades
+            modal.classList.add('show');
             modal.style.display = 'block';
-            modalLoading.style.display = 'block';
+            modal.style.visibility = 'visible';
+            modal.style.pointerEvents = 'auto';
+            modal.style.opacity = '1';
+            modal.style.zIndex = '1000';
+            
+            // Prevenir scroll del body cuando el modal está abierto
+            document.body.style.overflow = 'hidden';
+            
+            // Forzar reflow múltiples veces para asegurar que se aplique
+            void modal.offsetHeight;
+            void modal.offsetHeight;
+            
+            // Pequeño delay para asegurar que el navegador procese los cambios
+            await new Promise(resolve => setTimeout(resolve, 10));
+            
+            console.log('Estado del modal después de abrir:', {
+                display: modal.style.display,
+                computedDisplay: window.getComputedStyle(modal).display,
+                classList: modal.classList.toString(),
+                visibility: window.getComputedStyle(modal).visibility,
+                pointerEvents: window.getComputedStyle(modal).pointerEvents,
+                opacity: window.getComputedStyle(modal).opacity,
+                zIndex: window.getComputedStyle(modal).zIndex
+            });
             
             try {
-                // Hacer petición para obtener boletos del usuario para este sorteo
-                const response = await fetch(`http://localhost:3000/api/tickets/player/${currentWalletAddress}/lottery/${lotteryId}`);
+                console.log(`[NUEVA CONSULTA] Buscando boletos para wallet: ${currentWalletAddress}, sorteo: ${lotteryId} (${lotteryName})`);
+                
+                // Hacer petición para obtener SOLO los boletos del usuario para ESTE sorteo específico
+                // Añadir timestamp para evitar caché del navegador
+                const timestamp = new Date().getTime();
+                const url = `http://localhost:3500/api/v1/tickets/player/${currentWalletAddress}/lottery/${lotteryId}?t=${timestamp}`;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                console.log('Respuesta del servidor:', response.status, response.statusText);
+                console.log('Endpoint llamado:', `http://localhost:3500/api/v1/tickets/player/${currentWalletAddress}/lottery/${lotteryId}`);
                 
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error del servidor:', errorText);
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
                 
                 const tickets = await response.json();
+                console.log(`Boletos recibidos para sorteo #${lotteryId}:`, tickets);
+                console.log(`Total de boletos para este sorteo: ${tickets ? tickets.length : 0}`);
                 
-                // Mostrar boletos
-                displayTicketsInModal(tickets);
+                // Obtener información del sorteo para acceder a drawnNumbers
+                const lotteryResponse = await fetch(`http://localhost:3500/api/v1/lotteries/${lotteryId}`);
+                let lotteryInfo = null;
+                if (lotteryResponse.ok) {
+                    lotteryInfo = await lotteryResponse.json();
+                }
+                
+                // Mostrar boletos (solo de este sorteo específico)
+                displayTicketsInModal(tickets, lotteryName, lotteryId, lotteryInfo);
                 
             } catch (error) {
                 console.error('Error cargando boletos:', error);
                 modalContent.innerHTML = `
                     <div class="error">
                         ❌ Error cargando boletos: ${error.message}
+                        <br><br>
+                        <small>Wallet: ${currentWalletAddress}</small><br>
+                        <small>Sorteo ID: ${lotteryId}</small>
                         <br><br>
                         <button class="btn btn-primary" onclick="viewMyTickets(${lotteryId}, '${lotteryName}')">🔄 Reintentar</button>
                     </div>
@@ -857,70 +1452,191 @@
             }
         }
         
-        // Función para mostrar boletos en el modal
-        function displayTicketsInModal(tickets) {
+        // Función para mostrar boletos en el modal (solo del sorteo especificado)
+        function displayTicketsInModal(tickets, lotteryName = '', lotteryId = null, lotteryInfo = null) {
             const modalContent = document.getElementById('modalContent');
+            
+            console.log(`Mostrando boletos en modal para sorteo #${lotteryId}:`, tickets);
+            console.log('Información del sorteo:', lotteryInfo);
+            
+            // Obtener el nombre correcto del sorteo desde lotteryInfo si está disponible
+            let displayLotteryName = lotteryName;
+            if (lotteryInfo && lotteryInfo.lotteryName) {
+                displayLotteryName = lotteryInfo.lotteryName;
+            }
+            
+            // Calcular cantidad de números sorteados
+            let drawnNumbersCount = 0;
+            if (lotteryInfo && lotteryInfo.drawnNumbers) {
+                try {
+                    const drawnNumbers = typeof lotteryInfo.drawnNumbers === 'string' 
+                        ? JSON.parse(lotteryInfo.drawnNumbers) 
+                        : lotteryInfo.drawnNumbers;
+                    drawnNumbersCount = Array.isArray(drawnNumbers) ? drawnNumbers.length : 0;
+                } catch (e) {
+                    console.warn('Error parseando números sorteados:', e);
+                }
+            }
             
             if (!tickets || tickets.length === 0) {
                 modalContent.innerHTML = `
-                    <div class="no-tickets">
+                    <div class="no-tickets" style="text-align: center; padding: 40px;">
                         <h3>😔 No tienes boletos para este sorteo</h3>
-                        <p>¡Compra boletos para participar en el próximo sorteo!</p>
+                        <p>No has comprado boletos para el sorteo <strong>"${displayLotteryName}"${lotteryId ? ` (Sorteo #${lotteryId})` : ''}</strong></p>
+                        <p style="opacity: 0.7; margin-top: 10px; font-size: 0.9em;">Estos son solo los boletos de este sorteo específico.</p>
+                        <button class="btn btn-primary" onclick="closeTicketsModal(); return false;" style="margin-top: 20px;">Cerrar</button>
                     </div>
                 `;
                 return;
             }
             
-            const ticketsHTML = tickets.map(ticket => {
-                const numbers = JSON.parse(ticket.chosenNumbers || '[]');
-                const isWinner = ticket.isWinner;
-                const purchaseDate = new Date(ticket.purchasedAt).toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                
-                return `
-                    <div class="ticket-card">
-                        <div class="ticket-header">
-                            <div class="ticket-id">Boleto #${ticket.id}</div>
-                            <div class="ticket-status ${isWinner ? 'ticket-winner' : 'ticket-normal'}">
-                                ${isWinner ? '🏆 Ganador' : '🎫 Participante'}
+            // Añadir encabezado informativo
+            let headerInfo = '';
+            if (lotteryId) {
+                headerInfo = `<div style="margin-bottom: 20px; padding: 15px; background: rgba(102, 126, 234, 0.2); border-radius: 8px; text-align: center;">
+                    <p style="margin: 0; font-weight: bold;">📋 Sorteo: <strong>${displayLotteryName}</strong> (Sorteo #${lotteryId})</p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em; opacity: 0.8;">Mostrando ${tickets.length} boleto${tickets.length !== 1 ? 's' : ''} de este sorteo</p>
+                </div>`;
+            }
+            
+            const ticketsHTML = tickets.map((ticket, index) => {
+                try {
+                    // Parsear números elegidos
+                    let numbers = [];
+                    if (ticket.chosenNumbers) {
+                        if (typeof ticket.chosenNumbers === 'string') {
+                            numbers = JSON.parse(ticket.chosenNumbers || '[]');
+                        } else if (Array.isArray(ticket.chosenNumbers)) {
+                            numbers = ticket.chosenNumbers;
+                        }
+                    }
+                    
+                    const isWinner = ticket.isWinner === true || ticket.isWinner === 'true';
+                    const matchedNumbers = ticket.matchedNumbers || 0;
+                    
+                    // Determinar el estado del boleto
+                    // Reglas:
+                    // - Ganador: si isWinner === true
+                    // - Perdido: si tiene menos aciertos que números sorteados (matchedNumbers < drawnNumbersCount)
+                    // - En Juego: si tiene tantos aciertos como números sorteados (matchedNumbers === drawnNumbersCount && drawnNumbersCount > 0)
+                    // - Participante: si no se han sorteado números aún
+                    let ticketStatus = '';
+                    let ticketStatusClass = '';
+                    let ticketStatusBg = '';
+                    
+                    if (isWinner) {
+                        ticketStatus = '🏆 Ganador';
+                        ticketStatusClass = 'ticket-winner';
+                        ticketStatusBg = 'rgba(76, 175, 80, 0.3)';
+                    } else if (drawnNumbersCount > 0) {
+                        // Hay números sorteados
+                        if (matchedNumbers < drawnNumbersCount) {
+                            // Tiene menos aciertos que números sorteados = Perdido
+                            ticketStatus = '❌ Perdido';
+                            ticketStatusClass = 'ticket-lost';
+                            ticketStatusBg = 'rgba(244, 67, 54, 0.3)';
+                        } else if (matchedNumbers === drawnNumbersCount) {
+                            // Tiene tantos aciertos como números sorteados = En Juego
+                            ticketStatus = '🎮 En Juego';
+                            ticketStatusClass = 'ticket-in-game';
+                            ticketStatusBg = 'rgba(33, 150, 243, 0.3)';
+                        } else {
+                            // Tiene más aciertos que números sorteados (no debería pasar, pero por si acaso)
+                            ticketStatus = '🎮 En Juego';
+                            ticketStatusClass = 'ticket-in-game';
+                            ticketStatusBg = 'rgba(33, 150, 243, 0.3)';
+                        }
+                    } else {
+                        // No se han sorteado números aún
+                        ticketStatus = '🎫 Participante';
+                        ticketStatusClass = 'ticket-participant';
+                        ticketStatusBg = 'rgba(255,255,255,0.2)';
+                    }
+                    
+                    // Formatear fecha de compra
+                    let purchaseDate = 'N/A';
+                    try {
+                        if (ticket.purchasedAt) {
+                            const date = new Date(ticket.purchasedAt);
+                            if (!isNaN(date.getTime())) {
+                                purchaseDate = date.toLocaleDateString('es-ES', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Error formateando fecha:', e);
+                    }
+                    
+                    // Formatear precio
+                    const price = ticket.ticketPricePaid ? 
+                        (typeof ticket.ticketPricePaid === 'number' ? ticket.ticketPricePaid : parseFloat(ticket.ticketPricePaid)) : 0;
+                    
+                    // Formatear premio
+                    const prize = ticket.prizeAmount ? 
+                        (typeof ticket.prizeAmount === 'number' ? ticket.prizeAmount : parseFloat(ticket.prizeAmount)) : 0;
+                    
+                    return `
+                        <div class="ticket-card" style="margin-bottom: 20px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                            <div class="ticket-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div class="ticket-id" style="font-weight: bold; font-size: 1.1em;">Boleto #${ticket.id || index + 1}</div>
+                                <div class="ticket-status ${ticketStatusClass}" style="padding: 5px 15px; border-radius: 20px; background: ${ticketStatusBg};">
+                                    ${ticketStatus}
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="ticket-numbers">
-                            ${numbers.map(num => `<div class="number-ball">${num}</div>`).join('')}
-                        </div>
-                        
-                        <div class="ticket-info">
-                            <div class="info-item">
-                                <div class="info-label">Fecha de Compra</div>
-                                <div class="info-value">${purchaseDate}</div>
+                            
+                            <div class="ticket-numbers" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; justify-content: center;">
+                                ${numbers.length > 0 ? numbers.map(num => `
+                                    <div class="number-ball" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
+                                        ${num}
+                                    </div>
+                                `).join('') : '<p style="opacity: 0.7;">Sin números registrados</p>'}
                             </div>
-                            <div class="info-item">
-                                <div class="info-label">Precio Pagado</div>
-                                <div class="info-value">${ticket.ticketPricePaid} ETH</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Números Coincidentes</div>
-                                <div class="info-value">${ticket.matchedNumbers || 0}/6</div>
-                            </div>
-                            ${isWinner ? `
+                            
+                            <div class="ticket-info" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
                                 <div class="info-item">
-                                    <div class="info-label">Premio Ganado</div>
-                                    <div class="info-value">${ticket.prizeAmount} ETH</div>
+                                    <div class="info-label" style="font-size: 0.85em; opacity: 0.8; margin-bottom: 5px;">Fecha de Compra</div>
+                                    <div class="info-value" style="font-weight: 500;">${purchaseDate}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label" style="font-size: 0.85em; opacity: 0.8; margin-bottom: 5px;">Precio Pagado</div>
+                                    <div class="info-value" style="font-weight: 500;">${price.toFixed(8)} ETH</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label" style="font-size: 0.85em; opacity: 0.8; margin-bottom: 5px;">Números Coincidentes</div>
+                                    <div class="info-value" style="font-weight: 500;">${matchedNumbers}/6</div>
+                                </div>
+                                ${isWinner && prize > 0 ? `
+                                    <div class="info-item">
+                                        <div class="info-label" style="font-size: 0.85em; opacity: 0.8; margin-bottom: 5px;">Premio Ganado</div>
+                                        <div class="info-value" style="font-weight: bold; color: #4CAF50;">${prize.toFixed(8)} ETH</div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            ${ticket.transactionHash ? `
+                                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2);">
+                                    <small style="opacity: 0.7; font-size: 0.8em;">Tx: ${ticket.transactionHash.substring(0, 20)}...</small>
                                 </div>
                             ` : ''}
                         </div>
-                    </div>
-                `;
+                    `;
+                } catch (error) {
+                    console.error('Error procesando ticket:', ticket, error);
+                    return `
+                        <div class="ticket-error" style="padding: 15px; background: rgba(244, 67, 54, 0.2); border-radius: 5px; margin-bottom: 10px;">
+                            <p>Error mostrando boleto #${ticket.id || index + 1}: ${error.message}</p>
+                        </div>
+                    `;
+                }
             }).join('');
             
             modalContent.innerHTML = `
                 <div class="tickets-container">
+                    ${headerInfo}
                     ${ticketsHTML}
                 </div>
             `;
@@ -928,18 +1644,90 @@
         
         // Función para cerrar el modal
         function closeTicketsModal() {
-            document.getElementById('ticketsModal').style.display = 'none';
+            const modal = document.getElementById('ticketsModal');
+            const modalContent = document.getElementById('modalContent');
+            const modalLoading = document.getElementById('modalLoading');
+            
+            if (!modal) {
+                console.warn('Modal no encontrado al intentar cerrar');
+                return;
+            }
+            
+            console.log('Cerrando modal...');
+            
+            // Limpiar contenido al cerrar
+            if (modalContent) {
+                modalContent.innerHTML = '';
+            }
+            if (modalLoading) {
+                modalLoading.style.display = 'none';
+            }
+            
+            // Ocultar modal completamente - resetear TODAS las propiedades
+            modal.classList.remove('show');
+            modal.style.removeProperty('display');
+            modal.style.removeProperty('visibility');
+            modal.style.removeProperty('pointer-events');
+            modal.style.removeProperty('opacity');
+            modal.style.removeProperty('z-index');
+            
+            // Restaurar display a none usando clase CSS
+            modal.style.display = 'none';
+            
+            // Limpiar cualquier overlay que pueda quedar
+            document.body.style.overflow = '';
+            document.body.style.removeProperty('overflow');
+            
+            // Forzar reflow para asegurar que el cambio se aplique
+            void modal.offsetHeight;
+            
+            console.log('Modal cerrado. Estado:', {
+                display: modal.style.display,
+                classList: modal.classList.toString(),
+                computedDisplay: window.getComputedStyle(modal).display
+            });
         }
         
-        // Cerrar modal al hacer click fuera de él
-        window.onclick = function(event) {
+        // Cerrar modal al hacer click fuera de él (usar event delegation para evitar conflictos)
+        // Usar un solo listener para evitar conflictos con otros handlers
+        let modalClickHandler = function(event) {
             const modal = document.getElementById('ticketsModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
+            // Verificar que el modal esté visible y que el click sea en el backdrop (no en el contenido)
+            if (modal && 
+                (modal.style.display === 'block' || modal.classList.contains('show')) &&
+                event.target === modal) {
+                console.log('Click en backdrop del modal, cerrando...');
+                event.preventDefault();
+                event.stopPropagation();
+                closeTicketsModal();
+                return false;
             }
+        };
+        
+        // Solo añadir el listener una vez
+        if (!document.modalClickHandlerAdded) {
+            document.addEventListener('click', modalClickHandler, true);
+            document.modalClickHandlerAdded = true;
+        }
+        
+        // Limpiar modal al presionar ESC (solo una vez)
+        if (!document.modalEscapeHandlerAdded) {
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    const modal = document.getElementById('ticketsModal');
+                    if (modal && (modal.style.display === 'block' || modal.classList.contains('show'))) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        closeTicketsModal();
+                        return false;
+                    }
+                }
+            }, true);
+            document.modalEscapeHandlerAdded = true;
         }
         
         // Función para actualizar el estado de los botones según los boletos del usuario
+        // OPTIMIZADA: Hace todas las consultas en paralelo para mejorar el rendimiento
         async function updateTicketButtons() {
             if (!isWalletConnected || !currentWalletAddress) {
                 // Si no hay wallet conectado, deshabilitar todos los botones
@@ -955,22 +1743,77 @@
             // Si hay wallet conectado, verificar boletos para cada sorteo
             const buttons = document.querySelectorAll('[id^="viewTicketsBtn_"]');
             
-            for (const btn of buttons) {
+            if (buttons.length === 0) return;
+            
+            // Crear array de promesas para hacer todas las consultas en paralelo
+            const ticketChecks = Array.from(buttons).map(async (btn) => {
                 const lotteryId = btn.id.split('_')[1];
+                const timestamp = new Date().getTime();
                 
                 try {
-                    const response = await fetch(`http://localhost:3000/api/tickets/player/${currentWalletAddress}/lottery/${lotteryId}`);
+                    // Hacer fetch con timestamp para evitar caché
+                    const response = await fetch(
+                        `http://localhost:3500/api/v1/tickets/player/${currentWalletAddress}/lottery/${lotteryId}?t=${timestamp}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0'
+                            }
+                        }
+                    );
+                    
                     if (response.ok) {
                         const tickets = await response.json();
                         const hasTickets = tickets && tickets.length > 0;
                         
-                        btn.disabled = false;
-                        btn.style.opacity = hasTickets ? '1' : '0.6';
-                        btn.textContent = hasTickets ? `🎫 Ver Boletos (${tickets.length})` : '🎫 Sin Boletos';
+                        return {
+                            btn: btn,
+                            hasTickets: hasTickets,
+                            count: tickets ? tickets.length : 0
+                        };
+                    } else {
+                        return {
+                            btn: btn,
+                            hasTickets: false,
+                            count: 0,
+                            error: true
+                        };
                     }
                 } catch (error) {
                     console.error(`Error checking tickets for lottery ${lotteryId}:`, error);
+                    return {
+                        btn: btn,
+                        hasTickets: false,
+                        count: 0,
+                        error: true
+                    };
                 }
+            });
+            
+            // Esperar todas las promesas en paralelo
+            try {
+                const results = await Promise.all(ticketChecks);
+                
+                // Actualizar botones con los resultados
+                results.forEach(result => {
+                    if (result.btn) {
+                        result.btn.disabled = false;
+                        result.btn.style.opacity = result.hasTickets ? '1' : '0.6';
+                        result.btn.textContent = result.hasTickets 
+                            ? `🎫 Ver Boletos (${result.count})` 
+                            : '🎫 Sin Boletos';
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating ticket buttons:', error);
+                // En caso de error, mantener los botones habilitados
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.textContent = '🎫 Ver Mis Boletos';
+                });
             }
         }
         
@@ -997,11 +1840,60 @@
             }
         }
         
+        // Variables para gestos táctiles
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        // Función para manejar gestos táctiles
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    // Swipe izquierda - siguiente slide
+                    moveCarousel(1);
+                } else {
+                    // Swipe derecha - slide anterior
+                    moveCarousel(-1);
+                }
+            }
+        }
+        
+        // Función para pausar auto-slide cuando el usuario interactúa
+        function pauseAutoSlideOnInteraction() {
+            stopAutoSlide();
+            setTimeout(() => {
+                startAutoSlide();
+            }, 15000); // Reanudar después de 15 segundos de inactividad
+        }
+        
         // Cargar sorteos cuando la página esté lista
         document.addEventListener('DOMContentLoaded', function() {
             checkExistingConnection();
             updateWalletUI();
             loadLotteriesAndUpdateButtons();
+            
+            // Configurar eventos táctiles para el carrusel (manual)
+            const carousel = document.getElementById('lotteries-carousel');
+            
+            carousel.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            carousel.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+            
+            // Soporte para teclado (manual)
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    moveCarousel(-1);
+                } else if (e.key === 'ArrowRight') {
+                    moveCarousel(1);
+                }
+            });
             
             // Recargar sorteos cada 30 segundos
             setInterval(loadLotteriesAndUpdateButtons, 30000);
